@@ -17,7 +17,8 @@ function MAssistant() {
     return (
         <Mui.Box
             sx={{
-                width: { xs: "100%", sm: "80%", md: "55%" },
+                width: { xs: "100%", sm: "70%", md: "55%" },
+                ml: { xs: "0%", sm: "30%", md: "30%" },
                 maxWidth: 2000,
                 mx: "auto",
                 bgcolor: "background.paper",
@@ -46,7 +47,9 @@ function MAssistant() {
             
             <MHistoryChatList />
             
-            
+            <MChatInputBar />
+
+            <MChatMessages ChatList={ChatList} />
 
         </Mui.Box>
     )
