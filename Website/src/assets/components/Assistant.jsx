@@ -26,7 +26,7 @@ function MAssistant() {
                 boxShadow: 3,
                 padding: 5,
                 marginTop: 10,
-                marginBottom: 5,
+                marginBottom: 20,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "center",

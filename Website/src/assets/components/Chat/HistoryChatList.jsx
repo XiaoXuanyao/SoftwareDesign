@@ -13,7 +13,7 @@ function MHistoryChatList() {
 
     return (
         <Mui.Paper
-            elevation={3}
+            elevation={2}
             sx={{
                 position: "fixed",
                 top: 0,
@@ -57,16 +57,22 @@ function MHistoryChatList() {
                             sx={{
                                 mb: 0.5,
                                 borderRadius: 1,
-                                ":hover": { bgcolor: "action.hover" },
                             }}
                         >
-                            <Mui.ListItemButton sx={{ py: 0.75, pr: 2, alignItems: "flex-start" }}>
+                            <Mui.ListItemButton sx={{ p:0, alignItems: "flex-start" }}>
                                 <Mui.ListItemIcon sx={{ minWidth: 32 }}>
-                                    <MuiIcons.ChatBubbleOutline fontSize="small" />
+                                    <MuiIcons.ChatBubbleOutline
+                                        fontSize="small"
+                                        sx={{ m: 1, ml: 2 }}
+                                    />
                                 </Mui.ListItemIcon>
                                 <Mui.ListItemText
                                     primary={
-                                        <Mui.Typography variant="body2" noWrap>
+                                        <Mui.Typography
+                                            variant="body2"
+                                            noWrap
+                                            sx={{ p: 0 }}
+                                        >
                                             {it.title}
                                         </Mui.Typography>
                                     }
@@ -75,11 +81,12 @@ function MHistoryChatList() {
                                             variant="caption"
                                             color="text.secondary"
                                             noWrap
-                                            sx={{ display: "block", mt: 0.25 }}
+                                            sx={{ display: "block", p: 0 }}
                                         >
                                             {it.time}
                                         </Mui.Typography>
                                     }
+                                    sx={{ p: 0 }}
                                 />
                             </Mui.ListItemButton>
                         </Mui.ListItem>
