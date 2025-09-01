@@ -12,9 +12,7 @@ function MTopBar(props) {
                 <Mui.IconButton edge="start" color="inherit" aria-label="menu" sx={{ ml: 2, mr: 2 }}>
                     <MuiIcons.Menu />
                 </Mui.IconButton>
-                <Mui.Typography variant="subtitle1" color="inherit" component="div" sx={{ mr: 2, display: { xs: "none", sm: "flex" } }}>
-                    {props.title}
-                </Mui.Typography>
+                <Mui.Button href="/" sx={{ display: { xs: "none", sm: "flex" } }}>{props.title}</Mui.Button>
 
                 <Mui.Button variant="text" href="/" color="inherit" size="medium">
                     <MuiIcons.Home />

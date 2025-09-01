@@ -43,6 +43,29 @@ const theme = createTheme(baseTheme, {
                 body: {
                     backgroundColor: baseTheme.palette.background.default,
                     margin: 0
+                },
+                html: {
+                    scrollbarGutter: 'stable',
+                },
+                '::-webkit-scrollbar': {
+                    width: 8,
+                    height: 8
+                },
+                '::-webkit-scrollbar-track': {
+                    background: 'transparent'
+                },
+                '::-webkit-scrollbar-thumb': {
+                    backgroundColor: 'rgba(0,0,0,0.25)',
+                    borderRadius: 4,
+                    transition: 'background-color .2s'
+                },
+                '::-webkit-scrollbar-thumb:hover': {
+                    backgroundColor: 'rgba(0,0,0,0.45)'
+                },
+                // Firefox
+                '*': {
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(0,0,0,0.35) transparent'
                 }
             }
         },

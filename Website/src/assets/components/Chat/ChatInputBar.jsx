@@ -4,8 +4,8 @@ import * as MuiIcons from "@mui/icons-material";
 
 function MChatInputBar(props) {
     const sidebarWidths = { xs: "0vw", sm: "30vw", md: "20vw" };
-    const minRows = 5;
-    const maxRows = 9;
+    const minRows = 4;
+    const maxRows = 8;
 
     const [value, setValue] = React.useState("");
     const [openSetting, setOpenSetting] = React.useState(false);
@@ -50,7 +50,7 @@ function MChatInputBar(props) {
                 sx={{
                     borderRadius: 2,
                     p: 1.5,
-                    pb: 7,
+                    pb: 5,
                     overflow: "hidden",
                     bgcolor: "background.paper",
                 }}
@@ -59,8 +59,8 @@ function MChatInputBar(props) {
                 onClick={search}
                 sx={{
                     position: "absolute",
-                    bottom: 16,
-                    right: 16,
+                    bottom: 10,
+                    right: 12,
                     cursor: "pointer",
                     color: value ? "primary.main" : "text.disabled",
                     "&:hover": { color: "primary.dark" },
