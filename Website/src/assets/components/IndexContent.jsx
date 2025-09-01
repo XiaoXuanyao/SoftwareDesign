@@ -2,8 +2,8 @@ import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import SearchBox from "./SearchBox.jsx";
-import TrendingSearches from "./TrendingSearches.jsx";
-import WeekTopics from "./WeekTopics.jsx";
+import TrendingSearches from "./Index/TrendingSearches.jsx";
+import WeekTopics from "./Index/WeekTopics.jsx";
 
 function MIndexContent() {
     return (
@@ -29,12 +29,13 @@ function MIndexContent() {
             <Mui.Typography
                 variant="h4"
                 sx={{
-                    mb: 6,
+                    mb: 4,
                     fontWeight: 700,
                     textShadow: "1px 1px 0.5px rgba(0, 0, 0, 0.5)"
                 }}>
                 程序设计竞赛知识问答系统
             </Mui.Typography>
+            <Mui.Divider sx={{ mb: 4 }} />
 
             <SearchBox
                 width="100%"

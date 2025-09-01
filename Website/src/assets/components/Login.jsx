@@ -65,6 +65,7 @@ function MIndexContent() {
                     }}>
                     登录
                 </Mui.Typography>
+                <Mui.Divider sx={{ mb: 4 }} />
                 <Mui.TextField
                     label="账号"
                     variant="outlined"

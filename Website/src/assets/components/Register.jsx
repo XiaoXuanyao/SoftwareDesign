@@ -71,6 +71,7 @@ function MIndexContent() {
                     }}>
                     注册
                 </Mui.Typography>
+                <Mui.Divider sx={{ mb: 4 }} />
 
                 <Mui.TextField
                     label="用户名"

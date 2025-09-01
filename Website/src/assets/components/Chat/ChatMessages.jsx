@@ -7,7 +7,7 @@ function MChatMessages(props) {
     const { ChatList } = props;
 
     return (
-        <Mui.Box sx={{ mt: 10, mb: 20 }}>
+        <Mui.Box sx={{ mt: 10, mb: 18 }}>
             {ChatList.map((chat) => (
                 <Mui.Box
                     key={chat.id}

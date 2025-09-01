@@ -11,6 +11,14 @@ function MKnowledge() {
             summary: `这是关于算法主题 #${i + 1} 的简要描述占位。`,
         })), []
     );
+    const [batchDelete, setBatchDelete] = React.useState(false);
+    const [isManager, checkIsManager] = React.useState(true);
+
+    const buttonStyle = {
+        "&:hover": {
+            color: "white",
+        }
+    };
 
     return (
         <Mui.Box
@@ -41,7 +49,37 @@ function MKnowledge() {
                 }}>
                 知识库
             </Mui.Typography>
+            <Mui.Divider sx={{ mb: 4 }} />
 
+            <Mui.Box sx={{ mb: 4 }}>
+                {/*工具栏*/}
+                <Mui.Button variant="contained" sx={{ ...buttonStyle, mr: 2 }}>
+                    新建
+                </Mui.Button>
+                <Mui.Button disabled={!batchDelete} variant="contained" color="error" sx={{ ...buttonStyle, mr: 2 }}>
+                    批量删除
+                </Mui.Button>
+            </Mui.Box>
+
+            {isManager && (<>
+                <Mui.Divider sx={{ mb: 4 }}><Mui.Chip label="管理员操作" size="small" /></Mui.Divider>
+                <Mui.Box sx={{ mb: 4 }}>
+                    <Mui.Button
+                        variant="contained"
+                        href="/manage-docs"
+                        sx={{
+                            ...buttonStyle,
+                            color: "common.white",
+                            mr: 2,
+                            '&&': { color: 'common.white' },
+                        }}
+                    >
+                        文档管理
+                    </Mui.Button>
+                </Mui.Box>
+            </>)}
+
+            <Mui.Divider sx={{ mb: 4 }} />
             <Mui.Box
                 sx={{
                     width: "100%",

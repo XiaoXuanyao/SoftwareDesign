@@ -38,12 +38,13 @@ function MAssistant() {
             <Mui.Typography
                 variant="h4"
                 sx={{
-                    mb: 6,
+                    mb: 4,
                     fontWeight: 700,
                     textShadow: "1px 1px 0.5px rgba(0, 0, 0, 0.5)"
                 }}>
                 AI智慧搜索与问答
             </Mui.Typography>
+            <Mui.Divider sx={{ mb: 4 }} />
             
             <MHistoryChatList />
             
