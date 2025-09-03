@@ -2,11 +2,35 @@ import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import mainImg from "../images/main.png";
+import { Login } from "../api/Auth.jsx";
 
 function MIndexContent() {
-    const [account, setAccount] = React.useState("");
+    const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [showPwd, setShowPwd] = React.useState(false);
+    const [loginStatus, setLoginStatus] = React.useState(null);
+    const [loginMessage, setLoginMessage] = React.useState("");
+
+    const loginCallback = (result) => {
+        if (result.ok) {
+            setLoginStatus("success");
+            setLoginMessage("登录成功");
+        } else {
+            setLoginStatus("error");
+            setLoginMessage(result.message[0] || "登录失败");
+        }
+    };
+
+    const startLogin = () => {
+        setLoginStatus("loading");
+        Login(
+            {
+                username,
+                password
+            },
+            loginCallback
+        );
+    }
 
     return (
         <Mui.Box
@@ -67,12 +91,12 @@ function MIndexContent() {
                 </Mui.Typography>
                 <Mui.Divider sx={{ mb: 4 }} />
                 <Mui.TextField
-                    label="账号"
+                    label="用户名"
                     variant="outlined"
                     size="small"
                     fullWidth
-                    value={account}
-                    onChange={(e) => setAccount(e.target.value)}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     sx={{ mb: 2 }}
                 />
                 <Mui.TextField
@@ -98,12 +122,27 @@ function MIndexContent() {
                     }}
                     sx={{ mb: 4 }}
                 />
+                {loginStatus === "loading" && (
+                    <Mui.Alert severity="info" sx={{ mb: 2 }}>正在登录...</Mui.Alert>
+                )}
+                {loginStatus === "error" && (
+                    <Mui.Alert severity="error" sx={{ mb: 2 }}>{loginMessage}</Mui.Alert>
+                )}
+                {loginStatus === "success" && (
+                    <Mui.Alert severity="success" sx={{ mb: 2 }}>{loginMessage}</Mui.Alert>
+                )}
                 <Mui.Button
-                    type="submit"
+                    type="button"
                     variant="contained"
                     color="primary"
-                    sx={{ mt: 1, fontWeight: 600 }}
-                    disableElevation
+                    onClick={startLogin}
+                    sx={{
+                        mt: 1,
+                        fontWeight: 600,
+                        ":hover": {
+                            color: "text.onprimary"
+                        }
+                    }}
                 >
                     登录
                 </Mui.Button>

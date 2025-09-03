@@ -1,4 +1,5 @@
 import mysql.connector
+from typing import Literal
 
 USER_CONFIG = {
     "host": "localhost",
@@ -13,7 +14,7 @@ def ensure_conn():
     if not conn.is_connected():
         conn.reconnect(attempts=2, delay=1)
 
-def execute(sql, *params, dictionary=False, fetch: str="one"|"all"):
+def execute(sql, params=[], dictionary=True, fetch: Literal["one", "all"]="one"):
     ensure_conn()
     res = None
     try:

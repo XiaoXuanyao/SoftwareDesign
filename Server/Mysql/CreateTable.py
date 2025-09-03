@@ -1,4 +1,4 @@
-from Execute import execute
+from .Execute import execute
 import re
 
 
@@ -17,7 +17,7 @@ def check_database(dbname: str):
     _check_name(dbname, "数据库")
     row = execute(
         "SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME=%s LIMIT 1",
-        (dbname,),
+        [dbname],
         fetch='one'
     )
     return row is not None
@@ -29,7 +29,7 @@ def check_table(dbname: str, tbname: str):
     _check_name(dbname, "数据库")
     row = execute(
         "SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s LIMIT 1",
-        (dbname, tbname),
+        [dbname, tbname],
         fetch='one'
     )
     return row is not None
