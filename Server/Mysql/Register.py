@@ -57,9 +57,9 @@ def check_sex(sex: str):
     return False, "性别必须是 male 或 female"
 
 def check_age(age: int):
-    if 3 < age < 150:
+    if 3 <= age <= 150:
         return True, ""
-    return False, "年龄必须在 4 到 149 之间"
+    return False, "年龄必须在 3 到 150 之间"
 
 def check(mes: dict):
     is_valid, message = check_username(mes["username"])
@@ -77,22 +77,32 @@ def check(mes: dict):
     is_valid, message = check_phone(mes["phone"])
     if not is_valid:
         return False, message
-    is_valid, message = check_birthday(mes["birthday"])
-    if mes["birthday"] != "NULL" and not is_valid:
-        return False, message
-    is_valid, message = check_sex(mes["sex"])
-    if mes["sex"] != "NULL" and not is_valid:
-        return False, message
-    is_valid, message = check_age(mes["age"])
-    if mes["age"] != "NULL" and not is_valid:
-        return False, message
-    return True, "所有字段均有效"
+    if mes["birthday"] != None:
+        is_valid, message = check_birthday(mes["birthday"])
+        if not is_valid:
+            return False, message
+    if mes["sex"] != None:
+        is_valid, message = check_sex(mes["sex"])
+        if not is_valid:
+            return False, message
+    if mes["age"] != None:
+        is_valid, message = check_age(mes["age"])
+        if not is_valid:
+            return False, message
+    return True, ""
 
 def check_username_exists(username):
     row = execute("SELECT * FROM softwaredesign.users WHERE username=%s", (username,), fetch="one")
     return row is not None
 
-def register(mes):
+def register(mes: dict):
+    if (mes.get("birthday") is None):
+        mes["birthday"] = None
+    if (mes.get("sex") is None):
+        mes["sex"] = None
+    if (mes.get("age") is None):
+        mes["age"] = None
+        
     is_valid, message = check(mes)
     if not is_valid:
         return False, message

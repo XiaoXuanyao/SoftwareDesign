@@ -2,30 +2,58 @@ import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import mainImg from "../images/main.png";
+import {
+    Register,
+    CheckUsername,
+    CheckNickName,
+    CheckPassword,
+    CheckEmail,
+    CheckPhone
+} from "../api/Auth.jsx";
 
 function MIndexContent() {
-    const [account, setAccount] = React.useState("");
-    const [nickname, setNickname] = React.useState("");
+    const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [confirmPwd, setConfirmPwd] = React.useState("");
+    const [nickname, setNickname] = React.useState("");
     const [email, setEmail] = React.useState("");
+    const [phone, setPhone] = React.useState("");
     const [showPwd, setShowPwd] = React.useState(false);
     const [showPwd2, setShowPwd2] = React.useState(false);
-    const [error, setError] = React.useState("");
+    const [registerStatus, setRegisterStatus] = React.useState("");
+    const [registerMessage, setRegisterMessage] = React.useState("");
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!account || !nickname || !password || !confirmPwd || !email) {
-            setError("请完整填写所有字段");
+    const registerCallback = (result) => {
+        if (result.ok) {
+            setRegisterStatus("success");
+            setRegisterMessage("注册成功");
+        }
+        else {
+            setRegisterStatus("error");
+            setRegisterMessage(result.message[0] || "注册失败");
+        }
+    };
+
+    const startRegister = () => {
+        const error = CheckUsername(username) || CheckNickName(nickname)
+            || CheckPassword(password) || CheckEmail(email) || CheckPhone(phone);
+        if (error) {
+            setRegisterStatus("error");
+            setRegisterMessage(error);
             return;
         }
-        if (password !== confirmPwd) {
-            setError("两次输入的密码不一致");
-            return;
-        }
-        setError("");
-        console.log("register", { account, nickname, password, email });
-        // TODO: 发起实际注册请求
+        setRegisterStatus("loading");
+        Register(
+            {
+                username,
+                nickname,
+                password,
+                confirmPwd,
+                email,
+                phone
+            },
+            registerCallback
+        );
     };
 
     return (
@@ -50,7 +78,6 @@ function MIndexContent() {
 
             <Mui.Box
                 component="form"
-                onSubmit={handleSubmit}
                 noValidate
                 sx={{
                     display: "flex",
@@ -78,8 +105,8 @@ function MIndexContent() {
                     variant="outlined"
                     size="small"
                     fullWidth
-                    value={account}
-                    onChange={(e) => setAccount(e.target.value)}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     sx={{ mb: 2 }}
                 />
                 <Mui.TextField
@@ -89,6 +116,52 @@ function MIndexContent() {
                     fullWidth
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value)}
+                    sx={{ mb: 2 }}
+                />
+                <Mui.TextField
+                    label="密码"
+                    variant="outlined"
+                    size="small"
+                    type={showPwd ? "text" : "password"}
+                    fullWidth
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <Mui.IconButton
+                                    size="small"
+                                    onClick={() => setShowPwd(v => !v)}
+                                    edge="end"
+                                >
+                                    {showPwd ? <MuiIcons.VisibilityOff fontSize="small" /> : <MuiIcons.Visibility fontSize="small" />}
+                                </Mui.IconButton>
+                            )
+                        }
+                    }}
+                    sx={{ mb: 2 }}
+                />
+                <Mui.TextField
+                    label="确认密码"
+                    variant="outlined"
+                    size="small"
+                    type={showPwd2 ? "text" : "password"}
+                    fullWidth
+                    value={confirmPwd}
+                    onChange={(e) => setConfirmPwd(e.target.value)}
+                    slotProps={{
+                        input: {
+                            endAdornment: (
+                                <Mui.IconButton
+                                    size="small"
+                                    onClick={() => setShowPwd2(v => !v)}
+                                    edge="end"
+                                >
+                                    {showPwd2 ? <MuiIcons.VisibilityOff fontSize="small" /> : <MuiIcons.Visibility fontSize="small" />}
+                                </Mui.IconButton>
+                            )
+                        }
+                    }}
                     sx={{ mb: 2 }}
                 />
                 <Mui.TextField
@@ -102,58 +175,36 @@ function MIndexContent() {
                     sx={{ mb: 2 }}
                 />
                 <Mui.TextField
-                    label="密码"
+                    label="手机号"
+                    type="tel"
                     variant="outlined"
                     size="small"
-                    type={showPwd ? "text" : "password"}
                     fullWidth
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    InputProps={{
-                        endAdornment: (
-                            <Mui.IconButton
-                                size="small"
-                                onClick={() => setShowPwd(v => !v)}
-                                edge="end"
-                            >
-                                {showPwd ? <MuiIcons.VisibilityOff fontSize="small" /> : <MuiIcons.Visibility fontSize="small" />}
-                            </Mui.IconButton>
-                        )
-                    }}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     sx={{ mb: 2 }}
                 />
-                <Mui.TextField
-                    label="确认密码"
-                    variant="outlined"
-                    size="small"
-                    type={showPwd2 ? "text" : "password"}
-                    fullWidth
-                    value={confirmPwd}
-                    onChange={(e) => setConfirmPwd(e.target.value)}
-                    InputProps={{
-                        endAdornment: (
-                            <Mui.IconButton
-                                size="small"
-                                onClick={() => setShowPwd2(v => !v)}
-                                edge="end"
-                            >
-                                {showPwd2 ? <MuiIcons.VisibilityOff fontSize="small" /> : <MuiIcons.Visibility fontSize="small" />}
-                            </Mui.IconButton>
-                        )
-                    }}
-                    sx={{ mb: 2 }}
-                />
-                {error && (
-                    <Mui.Alert severity="error" variant="outlined" sx={{ py: 0.5 }}>
-                        {error}
-                    </Mui.Alert>
+                {registerStatus === "loading" && (
+                    <Mui.Alert severity="info" sx={{ mb: 2 }}>正在注册...</Mui.Alert>
+                )}
+                {registerStatus === "error" && (
+                    <Mui.Alert severity="error" sx={{ mb: 2 }}>{registerMessage}</Mui.Alert>
+                )}
+                {registerStatus === "success" && (
+                    <Mui.Alert severity="success" sx={{ mb: 2 }}>{registerMessage}</Mui.Alert>
                 )}
                 <Mui.Button
-                    type="submit"
+                    type="button"
                     variant="contained"
                     color="primary"
-                    disableElevation
-                    sx={{ mt: 4, fontWeight: 600 }}
+                    onClick={startRegister}
+                    sx={{
+                        mt: 4,
+                        fontWeight: 600,
+                        ":hover": {
+                            color: "text.onprimary"
+                        }
+                    }}
                 >
                     确认注册
                 </Mui.Button>

@@ -2,7 +2,7 @@ import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import mainImg from "../images/main.png";
-import { Login } from "../api/Auth.jsx";
+import { Login, CheckUsername, CheckPassword } from "../api/Auth.jsx";
 
 function MIndexContent() {
     const [username, setUsername] = React.useState("");
@@ -15,13 +15,20 @@ function MIndexContent() {
         if (result.ok) {
             setLoginStatus("success");
             setLoginMessage("登录成功");
-        } else {
+        }
+        else {
             setLoginStatus("error");
             setLoginMessage(result.message[0] || "登录失败");
         }
     };
 
     const startLogin = () => {
+        var error = CheckUsername(username) || CheckPassword(password);
+        if (error) {
+            setLoginStatus("error");
+            setLoginMessage(error);
+            return;
+        }
         setLoginStatus("loading");
         Login(
             {
@@ -30,7 +37,7 @@ function MIndexContent() {
             },
             loginCallback
         );
-    }
+    };
 
     return (
         <Mui.Box
@@ -65,11 +72,6 @@ function MIndexContent() {
             />
             <Mui.Box
                 component="form"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    // TODO: 执行登录逻辑
-                    console.log("login", { account, password });
-                }}
                 sx={{
                     display: "flex",
                     flexDirection: "column",

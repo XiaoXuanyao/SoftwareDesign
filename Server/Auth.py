@@ -45,6 +45,6 @@ def api_login(body: LoginIn):
         ok, msg = login(body.model_dump())
         if not ok:
             raise HTTPException(status_code=400, detail=msg)
-        return {"ok": True, "message": "登录成功", "userid": msg["userid"]}
+        return {"ok": True, "message": "登录成功", "userid": msg}
     except Exception as e:
         return {"ok": False, "message": "登录失败: " + str(e)}
