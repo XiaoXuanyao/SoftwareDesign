@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from Auth import router as auth_router
+from Knowledge import router as knowledge_router
 import Mysql.CreateTable
 
 Mysql.CreateTable.check()
@@ -14,3 +15,4 @@ app.add_middleware(
     allow_credentials=True,
 )
 app.include_router(auth_router)
+app.include_router(knowledge_router)

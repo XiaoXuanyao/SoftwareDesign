@@ -29,7 +29,7 @@ def check_permission(collectionname: str, userid: str, type: Literal["w", "r"]):
 
 
 def insert(mes: dict):
-    is_valid, message = check_permission(mes["collectionname"], "w")
+    is_valid, message = check_permission(mes["collectionname"], mes["userid"], "w")
     if not is_valid:
         return False, message
     execute(
