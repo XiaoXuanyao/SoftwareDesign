@@ -44,7 +44,7 @@ def create_database(dbname: str):
 
 
 
-def create_table(dbname: str, tbname: str, columns: dict):
+def create_table(dbname: str, tbname: str, columns: dict, refs: list=[]):
     _check_name(tbname, "表")
     _check_name(dbname, "数据库")
     if len(columns) == 0:
@@ -55,6 +55,8 @@ def create_table(dbname: str, tbname: str, columns: dict):
     parts = []
     for name, definition in columns.items():
         parts.append(f"`{name}` {definition}")
+    for ref in refs:
+        parts.append(ref)
     sql = (f"CREATE TABLE IF NOT EXISTS `{dbname}`.`{tbname}` ("
         + ", ".join(parts)
         + f")"
@@ -69,7 +71,12 @@ def create_default_database():
 
 
 
-def create_user_table():
+def create_collections_database():
+    create_database("sdcollections")
+
+
+
+def create_users_table():
     create_table("softwaredesign", "users", {
         "userid": "CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID())",
         "username": "VARCHAR(100) NOT NULL UNIQUE",
@@ -85,8 +92,40 @@ def create_user_table():
 
 
 
+def create_collections_meta_table():
+    create_table("softwaredesign", "collections", {
+        "collectionid": "CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID())",
+        "collectionname": "VARCHAR(100) NOT NULL UNIQUE",
+        "userid": "CHAR(36) NOT NULL",
+        "description": "TEXT",
+        "permission": "ENUM('private', 'public') NOT NULL DEFAULT 'private'",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+    },
+    [
+        "FOREIGN KEY (`userid`) REFERENCES `users`(`userid`) ON DELETE CASCADE"
+    ])
+
+
+
+def create_collections_table(collectionname: str):
+    create_table("sdcollections", collectionname, {
+        "id": "INT AUTO_INCREMENT PRIMARY KEY",
+        "name": "VARCHAR(100) NOT NULL UNIQUE",
+        "type": "VARCHAR(50)",
+        "description": "TEXT",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+    })
+
+
+
 def check():
     if not check_database("softwaredesign"):
         create_default_database()
+    if not check_database("sdcollections"):
+        create_collections_database()
     if not check_table("softwaredesign", "users"):
-        create_user_table()
+        create_users_table()
+    if not check_table("softwaredesign", "collections"):
+        create_collections_meta_table()
