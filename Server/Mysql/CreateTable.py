@@ -1,4 +1,5 @@
 from .Execute import execute
+from ..Debug import Debug
 import re
 
 
@@ -129,3 +130,4 @@ def check():
         create_users_table()
     if not check_table("softwaredesign", "collections"):
         create_collections_meta_table()
+    Debug.log("Debug", "MySQL数据库检验完成")

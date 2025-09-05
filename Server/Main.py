@@ -1,10 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from Auth import router as auth_router
-from Knowledge import router as knowledge_router
-import Mysql.CreateTable
+from .Auth import router as auth_router
+from .Knowledge import router as knowledge_router
+from .Mysql import CreateTable
 
-Mysql.CreateTable.check()
+CreateTable.check()
 
 app = FastAPI()
 app.add_middleware(

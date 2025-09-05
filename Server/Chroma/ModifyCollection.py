@@ -3,7 +3,7 @@ from .AddCollection import check_collection_name
 from .Init import client
 from ..Mysql.Execute import execute
 from .Embedding.Extract import extract
-from .Embedding.Embedding import embdding_chunks
+from .Embedding.Embedding import embedding_chunks
 
 
 
@@ -41,7 +41,7 @@ def insert(mes: dict):
     if not is_valid:
         return False, message
     chunks = message
-    embeddings = embdding_chunks(chunks)
+    embeddings = embedding_chunks(chunks)
     collection = client.get_collection(mes["collectionname"])
     documents = [ch.page_content for ch in chunks]
     metadata = []

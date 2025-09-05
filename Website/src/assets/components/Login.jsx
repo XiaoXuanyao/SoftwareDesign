@@ -3,6 +3,7 @@ import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import mainImg from "../images/main.png";
 import { Login, CheckUsername, CheckPassword } from "../api/Auth.jsx";
+import { GlobalVarsContext } from "../api/GlobalVars.jsx";
 
 function MIndexContent() {
     const [username, setUsername] = React.useState("");
@@ -15,6 +16,7 @@ function MIndexContent() {
         if (result.ok) {
             setLoginStatus("success");
             setLoginMessage("登录成功");
+            sessionStorage.setItem("userid", result.userid);
         }
         else {
             setLoginStatus("error");

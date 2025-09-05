@@ -4,6 +4,7 @@ from ..Mysql.CreateTable import create_collections_table
 from .Embedding.Embedding import embedding_function
 
 
+
 def check_collection_name(name: str):
     if not (1 <= len(name) <= 40):
         return False, "集合名长度必须在1到40之间"

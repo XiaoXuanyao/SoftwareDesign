@@ -1,11 +1,14 @@
 from typing import Optional, Literal, Any, Dict
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from Chroma.AddCollection import add_collection
-from Chroma.ModifyCollection import insert as insert_doc
-from Chroma.ModifyCollection import erase as erase_doc
+from .Chroma.AddCollection import add_collection
+from .Chroma.ModifyCollection import insert as insert_doc
+from .Chroma.ModifyCollection import erase as erase_doc
+from .Chroma.CheckCollections import query_all_collections
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
+
+
 
 class CollectionCreateIn(BaseModel):
     collectionname: str = Field(..., min_length=1, max_length=40)
@@ -27,9 +30,14 @@ class DocEraseIn(BaseModel):
     userid: str
     name: str
 
+class QueryCollectionsIn(BaseModel):
+    userid: str
+
 class RespOut(BaseModel):
     ok: bool
     message: str
+
+
 
 @router.post("/collection/create", response_model=RespOut)
 def api_create_collection(body: CollectionCreateIn):
@@ -40,6 +48,8 @@ def api_create_collection(body: CollectionCreateIn):
         return {"ok": True, "message": "创建成功"}
     except Exception as e:
         return {"ok": False, "message": f"创建失败: {e}"}
+
+
 
 @router.post("/collection/doc/insert", response_model=RespOut)
 def api_insert_document(body: DocInsertIn):
@@ -63,6 +73,8 @@ def api_insert_document(body: DocInsertIn):
     except Exception as e:
         return {"ok": False, "message": f"插入失败: {e}"}
 
+
+
 @router.post("/collection/doc/delete", response_model=RespOut)
 def api_delete_document(body: DocEraseIn):
     try:
@@ -77,3 +89,16 @@ def api_delete_document(body: DocEraseIn):
         return {"ok": True, "message": "删除成功"}
     except Exception as e:
         return {"ok": False, "message": f"删除失败: {e}"}
+
+
+
+@router.post("/collections/query", response_model=RespOut)
+def api_query_collections(body: QueryCollectionsIn):
+    try:
+        mes = {"userid": body.userid}
+        ok, msg = query_all_collections(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=msg)
+        return {"ok": True, "message": "查询成功", "collections": msg}
+    except Exception as e:
+        return {"ok": False, "message": f"查询失败: {e}"}

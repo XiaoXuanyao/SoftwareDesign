@@ -1,18 +1,27 @@
 import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
+import { GlobalVarsContext } from "../api/GlobalVars.jsx";
+import { queryKnowledge } from "../api/Knowledge";
 
 function MKnowledge() {
 
-    const items = React.useMemo(() =>
-        Array.from({ length: 20 }, (_, i) => ({
-            id: i + 1,
-            title: `算法主题 #${i + 1}`,
-            summary: `这是关于算法主题 #${i + 1} 的简要描述占位。`,
-        })), []
-    );
+    const [items, setItems] = React.useState([]);
     const [batchDelete, setBatchDelete] = React.useState(false);
     const [isManager, checkIsManager] = React.useState(true);
+    queryKnowledge(
+        {
+            userid: sessionStorage.getItem("userid") || null
+        },
+        (result) => {
+            if (result.ok) {
+                setItems(result.collections || []);
+            }
+            else {
+                console.log("查询失败", result.message);
+            }
+        }
+    );
 
     const buttonStyle = {
         "&:hover": {

@@ -1,6 +1,8 @@
 import * as React from "react";
 import getConfig from "./Config.jsx";
 
+
+
 export function CheckUsername(username) {
     if (!username) {
         return "用户名不能为空";
@@ -69,6 +71,7 @@ export function CheckPhone(phone) {
 export async function Login(mes, callback) {
     const username = mes.username;
     const password = mes.password;
+    const setUserid = mes.setUserid;
     var result = {
         ok: true,
         message: "unknown",
@@ -88,7 +91,6 @@ export async function Login(mes, callback) {
                 body: JSON.stringify({ username, password })
             });
             const data = await resp.json().catch(() => ({}));
-            console.log(data)
             if (!resp.ok || !data || !data.ok) {
                 result.ok = false;
                 result.message = [data.message, data.detail, "登录失败"];
@@ -106,7 +108,8 @@ export async function Login(mes, callback) {
             }
             else {
                 result.ok = false;
-                result.message = ["网络错误"];
+                result.message = ["网络错误", e.toString()];
+                console.log(e);
             }
         }
     }

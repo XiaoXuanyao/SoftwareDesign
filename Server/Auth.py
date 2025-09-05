@@ -1,10 +1,12 @@
 from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
-from Mysql.Register import register
-from Mysql.Login import login
+from .Mysql.Register import register
+from .Mysql.Login import login
 
 router = APIRouter(prefix="/api", tags=["auth"])
+
+
 
 class RegisterIn(BaseModel):
     username: str
@@ -29,6 +31,8 @@ class LoginOut(BaseModel):
     message: str
     userid: Optional[str] = None
 
+
+
 @router.post("/register", response_model=RegisterOut)
 def api_register(body: RegisterIn):
     try:
@@ -38,6 +42,8 @@ def api_register(body: RegisterIn):
         return {"ok": True, "message": msg}
     except Exception as e:
         return {"ok": False, "message": "注册失败: " + str(e)}
+
+
 
 @router.post("/login", response_model=LoginOut)
 def api_login(body: LoginIn):

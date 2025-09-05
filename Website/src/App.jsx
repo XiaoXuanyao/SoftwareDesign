@@ -3,6 +3,7 @@ import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import * as Router from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
+import { GlobalVarProvider } from "./assets/api/GlobalVars.jsx";
 import theme from "./assets/components/Utils/CustomTheme.jsx";
 import MTopBar from "./assets/components/TopBar.jsx";
 import MIndexContent from "./assets/components/IndexContent.jsx";
@@ -14,7 +15,7 @@ import Register from "./assets/components/Register.jsx";
 
 function App() {
     return (
-        <ThemeProvider theme={theme}>
+        <GlobalVarProvider><ThemeProvider theme={theme}>
             <Mui.CssBaseline />
             <Router.BrowserRouter>
                 <MTopBar title="程序设计竞赛知识问答系统" />
@@ -27,7 +28,7 @@ function App() {
                     <Router.Route path="/Register" element={<Register />} />
                 </Router.Routes>
             </Router.BrowserRouter>
-        </ThemeProvider>
+        </ThemeProvider></GlobalVarProvider>
     );
 }
 
