@@ -17,7 +17,7 @@ def _check_name(name: str, kind: str):
 def check_database(dbname: str):
     _check_name(dbname, "数据库")
     row = execute(
-        "SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME=%s LIMIT 1",
+        "SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME=%s LIMIT 1;",
         [dbname],
         fetch='one'
     )
@@ -29,7 +29,7 @@ def check_table(dbname: str, tbname: str):
     _check_name(tbname, "表")
     _check_name(dbname, "数据库")
     row = execute(
-        "SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s LIMIT 1",
+        "SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s LIMIT 1;",
         [dbname, tbname],
         fetch='one'
     )
@@ -40,7 +40,7 @@ def check_table(dbname: str, tbname: str):
 def create_database(dbname: str):
     _check_name(dbname, "数据库")
     execute(
-        f"CREATE DATABASE IF NOT EXISTS `{dbname}`"
+        f"CREATE DATABASE IF NOT EXISTS `{dbname}`;"
     )
 
 
@@ -60,7 +60,7 @@ def create_table(dbname: str, tbname: str, columns: dict, refs: list=[]):
         parts.append(ref)
     sql = (f"CREATE TABLE IF NOT EXISTS `{dbname}`.`{tbname}` ("
         + ", ".join(parts)
-        + f")"
+        + f") COLLATE=utf8mb4_bin;"
     )
 
     execute(sql)
@@ -83,6 +83,7 @@ def create_users_table():
         "username": "VARCHAR(100) NOT NULL UNIQUE",
         "password": "VARCHAR(100) NOT NULL",
         "nickname": "VARCHAR(100) NOT NULL",
+        "role": "ENUM('admin', 'expert', 'user') NOT NULL DEFAULT 'user'",
         "email": "VARCHAR(100) NOT NULL",
         "phone": "VARCHAR(100) NOT NULL UNIQUE",
         "birthday": "DATE",

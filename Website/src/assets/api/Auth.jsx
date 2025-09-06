@@ -97,8 +97,7 @@ export async function Login(mes, callback) {
             else {
                 result.ok = true;
                 result.message = ["登录成功"];
-                result.userid = data.userid;
-                result.username = username;
+                result.userdata = data.userdata || {};
             }
         } catch (e) {
             if (e.name === "AbortError") {

@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
-import mainImg from "../images/main.png";
+import { useNavigate } from "react-router-dom";
 import {
     Register,
     CheckUsername,
@@ -22,11 +22,13 @@ function MIndexContent() {
     const [showPwd2, setShowPwd2] = React.useState(false);
     const [registerStatus, setRegisterStatus] = React.useState("");
     const [registerMessage, setRegisterMessage] = React.useState("");
+    const navigate = useNavigate();
 
     const registerCallback = (result) => {
         if (result.ok) {
             setRegisterStatus("success");
             setRegisterMessage("注册成功");
+            navigate("/login");
         }
         else {
             setRegisterStatus("error");

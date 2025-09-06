@@ -5,6 +5,8 @@ import * as Router from "react-router-dom";
 import SearchBox from "./SearchBox.jsx";
 
 function MTopBar(props) {
+    const [nickname, setNickname] = React.useState(sessionStorage.getItem("nickname") || null);
+
     return (
         <Mui.AppBar>
             <Mui.Toolbar variant="dense" disableGutters>
@@ -28,10 +30,26 @@ function MTopBar(props) {
 
 
                 <Mui.Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Mui.Button variant="text" href="/login" color="inherit" size="medium">
-                        <MuiIcons.Login />
-                        <Mui.Box component="span" sx={{ display: { xs: "none", sm: "flex" } }}>登录</Mui.Box>
-                    </Mui.Button>
+                    {!nickname &&
+                        <Mui.Button variant="text" href="/login" color="inherit" size="medium">
+                            <MuiIcons.Login />
+                            <Mui.Box component="span" sx={{ display: { xs: "none", sm: "flex" } }}>登录</Mui.Box>
+                        </Mui.Button>
+                    }
+                    {nickname &&
+                        <Mui.Button
+                            variant="text"
+                            href="/login"
+                            color="inherit"
+                            size="medium"
+                            sx={{ textTransform: "none" }}
+                        >
+                            <MuiIcons.People />
+                            <Mui.Box component="span" sx={{ display: { xs: "none", sm: "flex" } }}>
+                                <Mui.Typography>{nickname}</Mui.Typography>
+                            </Mui.Box>
+                        </Mui.Button>
+                    }
                     <Mui.Button variant="text" href="/register" color="inherit" size="medium" sx={{ mr: 2, display: { xs: "none", sm: "flex" }}}>
                         注册
                     </Mui.Button>

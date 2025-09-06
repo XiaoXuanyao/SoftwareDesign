@@ -13,7 +13,7 @@ def decode_collection_name(name: str):
 def query_all_collections(mes: dict):
     rows = execute(
         "SELECT collectionname, userid, description, permission FROM softwaredesign.collections "
-        + "WHERE userid=%s",
+        + "WHERE userid=%s;",
         [mes["userid"]],
         dictionary=True,
         fetch="all",

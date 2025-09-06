@@ -13,13 +13,13 @@ def check_permission(collectionname: str, userid: str, type: Literal["w", "r"]):
         return False, message
     if type == "r":
         row = execute(
-            "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s AND permission=%s LIMIT 1",
+            "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s AND permission=%s LIMIT 1;",
             [collectionname, "public"],
         )
         if row is not None:
             return True, ""
     row = execute(
-        "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s AND userid=%s LIMIT 1",
+        "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s AND userid=%s LIMIT 1;",
         [collectionname, userid],
     )
     if row is not None:
@@ -34,7 +34,7 @@ def insert(mes: dict):
         return False, message
     execute(
         f"INSERT INTO sdcollections.{mes['collectionname']} ("
-            + "name, type, description) VALUES (%s, %s, %s)",
+            + "name, type, description) VALUES (%s, %s, %s);",
         [mes["name"], mes["type"], mes["description"]]
     )
     is_valid, message = extract(mes)
@@ -66,7 +66,7 @@ def erase(mes: dict):
     if not is_valid:
         return False, message
     execute(
-        f"DELETE FROM sdcollections.{mes['collectionname']} WHERE name=%s",
+        f"DELETE FROM sdcollections.{mes['collectionname']} WHERE name=%s;",
         [mes["name"]]
     )
     collection = client.get_collection(mes["collectionname"])

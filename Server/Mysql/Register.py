@@ -92,7 +92,7 @@ def check(mes: dict):
     return True, ""
 
 def check_username_exists(username):
-    row = execute("SELECT * FROM softwaredesign.users WHERE username=%s", (username,), fetch="one")
+    row = execute("SELECT * FROM softwaredesign.users WHERE username=%s;", (username,), fetch="one")
     return row is not None
 
 def register(mes: dict):
@@ -108,6 +108,6 @@ def register(mes: dict):
         return False, message
     if check_username_exists(mes["username"]):
         return False, "用户名已存在"
-    execute("INSERT INTO softwaredesign.users (username, password, nickname, email, phone, birthday, sex, age) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+    execute("INSERT INTO softwaredesign.users (username, password, nickname, email, phone, birthday, sex, age) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);",
              (mes["username"], mes["password"], mes["nickname"], mes["email"], mes["phone"], mes["birthday"], mes["sex"], mes["age"]))
     return True, "注册成功"

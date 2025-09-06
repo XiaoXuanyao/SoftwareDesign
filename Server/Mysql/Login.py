@@ -12,10 +12,14 @@ def checkpassword(password):
     return False, "密码长度必须在8到24之间"
 
 def check(username, password):
-    row = execute("SELECT * FROM softwaredesign.users WHERE username=%s AND password=%s", (username, password))
+    row = execute("SELECT userid, username, nickname FROM softwaredesign.users WHERE username=%s AND password=%s;", (username, password))
     if row == None:
         return False, "用户名或密码错误"
-    return True, row["userid"]
+    return True, {
+        "userid": row["userid"],
+        "username": row["username"],
+        "nickname": row["nickname"]
+    }
 
 def login(mes):
     try:

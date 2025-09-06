@@ -19,10 +19,9 @@ class CollectionCreateIn(BaseModel):
 class DocInsertIn(BaseModel):
     collectionname: str
     userid: str
-    name: str                      # 文档逻辑名称
-    type: str                      # 文档类型（你 insert 中使用）
+    name: str
+    type: str
     description: str = ""
-    # 其余可能被 extract 使用的字段保留灵活性
     extra: Dict[str, Any] = Field(default_factory=dict)
 
 class DocEraseIn(BaseModel):

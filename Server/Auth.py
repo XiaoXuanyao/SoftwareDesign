@@ -29,7 +29,7 @@ class LoginIn(BaseModel):
 class LoginOut(BaseModel):
     ok: bool
     message: str
-    userid: Optional[str] = None
+    userdata: Optional[dict] = None
 
 
 
@@ -51,6 +51,10 @@ def api_login(body: LoginIn):
         ok, msg = login(body.model_dump())
         if not ok:
             raise HTTPException(status_code=400, detail=msg)
-        return {"ok": True, "message": "登录成功", "userid": msg}
+        return {
+            "ok": True,
+            "message": "登录成功",
+            "userdata": msg
+        }
     except Exception as e:
         return {"ok": False, "message": "登录失败: " + str(e)}

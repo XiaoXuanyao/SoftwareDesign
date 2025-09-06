@@ -19,7 +19,7 @@ def check_collection(name: str):
     if not is_valid:
         return False, message
     row = execute(
-        "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s LIMIT 1",
+        "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s LIMIT 1;",
         [name],
     )
     if row is None:
@@ -44,7 +44,7 @@ def add_collection(mes: dict):
     if not is_valid:
         return False, message
     execute(
-        "INSERT INTO softwaredesign.collections (collectionname, hash, userid, description, permission) VALUES (%s, %s, %s, %s, %s)",
+        "INSERT INTO softwaredesign.collections (collectionname, hash, userid, description, permission) VALUES (%s, %s, %s, %s, %s);",
         [mes["collectionname"], mes["hash"], mes["userid"], mes["description"], mes["permission"]],
     )
     create_collections_table(mes["hash"])

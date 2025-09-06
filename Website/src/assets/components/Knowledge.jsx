@@ -24,6 +24,10 @@ function MKnowledge() {
                 if (result.ok) {
                     setItems(result.collections || []);
                 }
+                else if (result.message[0] == "用户未登录") {
+                    setCreateStatus("warning");
+                    setCreateMessage("登录后才能查看知识库");
+                }
                 else {
                     console.log("查询失败", result.message);
                 }
@@ -31,7 +35,6 @@ function MKnowledge() {
         );
         dirty && setDirty(false);
     }
-    React.useEffect(() => startQueryKnowledgeSet(), []);
     React.useEffect(() => startQueryKnowledgeSet(), [dirty]);
 
     const startCreateKnowledgeSet = () => {
@@ -142,6 +145,9 @@ function MKnowledge() {
             {createStatus === "loading" && (
                 <Mui.Alert severity="info" sx={alertStyle}>{createMessage}</Mui.Alert>
             )}
+            {createStatus === "warning" && (
+                <Mui.Alert severity="warning" sx={alertStyle}>{createMessage}</Mui.Alert>
+            )}
             {createStatus === "error" && (
                 <Mui.Alert severity="error" sx={alertStyle}>{createMessage}</Mui.Alert>
             )}
@@ -178,7 +184,8 @@ function MKnowledge() {
                             flexDirection: "column",
                             justifyContent: "center",
                             alignItems: "center",
-                            backgroundColor: "background.default",
+                            border: 2,
+                            pt: 1.5
                         }}
                     >
                         <Mui.CardContent>
@@ -194,6 +201,21 @@ function MKnowledge() {
                             >
                                 {item.description ? item.description : "暂无描述"}
                             </Mui.Typography>
+                            <Mui.Box sx={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                mt: 1
+                            }}>
+                                <Mui.IconButton size="small">
+                                    <MuiIcons.Edit color="primary"/>
+                                </Mui.IconButton>
+                                <Mui.IconButton size="samll">
+                                    <MuiIcons.Delete color="error"/>
+                                </Mui.IconButton>
+                            </Mui.Box>
+
                         </Mui.CardContent>
                     </Mui.Card>
                 ))}

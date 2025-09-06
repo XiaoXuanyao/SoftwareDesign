@@ -8,7 +8,6 @@ import { GlobalVarsContext } from "../api/GlobalVars.jsx";
 function MIndexContent() {
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
-    const [showPwd, setShowPwd] = React.useState(false);
     const [loginStatus, setLoginStatus] = React.useState(null);
     const [loginMessage, setLoginMessage] = React.useState("");
 
@@ -16,7 +15,11 @@ function MIndexContent() {
         if (result.ok) {
             setLoginStatus("success");
             setLoginMessage("登录成功");
-            sessionStorage.setItem("userid", result.userid);
+            const userdata = result.userdata || {};
+            sessionStorage.setItem("userid", userdata.userid);
+            sessionStorage.setItem("username", userdata.username);
+            sessionStorage.setItem("nickname", userdata.nickname);
+            window.location.href = "/";
         }
         else {
             setLoginStatus("error");
@@ -107,24 +110,12 @@ function MIndexContent() {
                     label="密码"
                     variant="outlined"
                     size="small"
-                    type={showPwd ? 'text' : 'password'}
+                    type='password'
                     fullWidth
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    slotProps={{
-                        input: {
-                            endAdornment: (
-                                <Mui.IconButton
-                                    size="small"
-                                    onClick={() => setShowPwd(v => !v)}
-                                    edge="end"
-                                >
-                                    {showPwd ? <MuiIcons.VisibilityOff fontSize="small" /> : <MuiIcons.Visibility fontSize="small" />}
-                                </Mui.IconButton>
-                            )
-                        }
-                    }}
                     sx={{ mb: 4 }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { startLogin(); } }}
                 />
                 {loginStatus === "loading" && (
                     <Mui.Alert severity="info" sx={{ mb: 2 }}>正在登录...</Mui.Alert>
