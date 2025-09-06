@@ -3,17 +3,21 @@ import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { GlobalVarsContext } from "../api/GlobalVars.jsx";
-import { queryKnowledgeSet, createKnowledgeSet } from "../api/Knowledge";
+import {
+    queryKnowledgeSet,
+    createKnowledgeSet,
+    deleteKnowledgeSets
+} from "../api/Knowledge";
 
 function MKnowledge() {
 
     const [items, setItems] = React.useState([]);
-    const [batchDelete, setBatchDelete] = React.useState(false);
-    const [isManager, checkIsManager] = React.useState(true);
     const [newSetName, setNewSetName] = React.useState("");
     const [createStatus, setCreateStatus] = React.useState(null);
     const [createMessage, setCreateMessage] = React.useState("");
     const [dirty, setDirty] = React.useState(true);
+    const [selectedItems, setSelectedItems] = React.useState([]);
+    const role = sessionStorage.getItem("userdata.role") || "visitor";
     const navigate = useNavigate();
 
     const startQueryKnowledgeSet = () => {
@@ -60,7 +64,7 @@ function MKnowledge() {
     };
 
     const gotoDocsManage = () => {
-        var role = sessionStorage.getItem("userdata.role");
+        let role = sessionStorage.getItem("userdata.role");
         if (role === "admin" || role === "expert") {
             navigate("/manage-docs");
         }
@@ -68,6 +72,42 @@ function MKnowledge() {
             setCreateStatus("warning");
             setCreateMessage("只有管理员和专家才能进行文档管理");
         }
+    }
+
+    const handleSelect = (collectionname) => {
+        setSelectedItems(prev =>
+            prev.includes(collectionname)
+                ? prev.filter(name => name !== collectionname)
+                : [...prev, collectionname]
+        );
+    };
+    
+    const startDeleteKnowledgeSets = (which) => {
+        let toDelete;
+        if (which === null) {
+            toDelete = selectedItems;
+        }
+        else {
+            toDelete = [which];
+        }
+        deleteKnowledgeSets(
+            {
+                userid: sessionStorage.getItem("userdata.userid") || null,
+                collectionnames: toDelete
+            },
+            (result) => {
+                if (result.ok) {
+                    setCreateStatus("success");
+                    setCreateMessage("知识库删除成功");
+                    setSelectedItems(prev => prev.filter(name => !toDelete.includes(name)));
+                    setDirty(true);
+                }
+                else {
+                    setCreateStatus("error");
+                    setCreateMessage("知识库删除失败: " + result.message[0]);
+                }
+            }
+        );
     }
 
     const buttonStyle = {
@@ -114,7 +154,7 @@ function MKnowledge() {
             </Mui.Typography>
             <Mui.Divider sx={{ mb: 4 }}><Mui.Chip label="管理员操作" size="small" /></Mui.Divider>
 
-            {isManager && (<>
+            {(role === "admin" || role === "expert") && (<>
                 <Mui.Box sx={{ mb: 4 }}>
                     <Mui.Button
                         variant="contained"
@@ -150,7 +190,13 @@ function MKnowledge() {
                 >
                     新建
                 </Mui.Button>
-                <Mui.Button disabled={!batchDelete} variant="contained" color="error" sx={{ ...buttonStyle, mr: 2 }}>
+                <Mui.Button
+                    disabled={!selectedItems.length > 0}
+                    variant="contained"
+                    color="error"
+                    sx={{ ...buttonStyle, mr: 2 }}
+                    onClick={() => startDeleteKnowledgeSets(null)}
+                >
                     批量删除
                 </Mui.Button>
             </Mui.Box>
@@ -198,33 +244,54 @@ function MKnowledge() {
                             justifyContent: "center",
                             alignItems: "center",
                             border: 2,
-                            pt: 1.5
+                            pt: 2,
+                            position: "relative",
                         }}
                     >
-                        <Mui.CardContent>
+                        <Mui.CardContent sx={{
+                            fontSize: {
+                                xs: "4.5vw",
+                                sm: "2.6vw",
+                                md: "1.35vw"
+                            }
+                        }}>
+                            <Mui.Checkbox
+                                checked={selectedItems.includes(item.collectionname)}
+                                onChange={() => handleSelect(item.collectionname)}
+                                sx={{
+                                    position: "absolute",
+                                    top: 2,
+                                    right: 2
+                                }}
+                                icon={<MuiIcons.CheckBoxOutlineBlank fontSize="100%" />}
+                                checkedIcon={<MuiIcons.CheckBox fontSize="100%" />}
+                            />
                             <Mui.Typography
                                 variant="body"
-                                sx={{ fontWeight: 'bold' }}
+                                sx={{ fontWeight: 'bold', fontSize: "80%" }}
                             >
                                 {item.collectionname}
                             </Mui.Typography>
                             <Mui.Typography
                                 variant="body2"
-                                sx= {{ mt: 1 }}
+                                sx= {{ mt: 0.5, fontSize: "65%" }}
                             >
                                 {item.description ? item.description : "暂无描述"}
                             </Mui.Typography>
                             <Mui.Box sx={{
                                 display: "flex",
                                 flexDirection: "row",
-                                justifyContent: "flex-end",
+                                justifyContent: "center",
                                 alignItems: "center",
-                                mt: 1
+                                mt: 0.5
                             }}>
                                 <Mui.IconButton size="small">
                                     <MuiIcons.Edit color="primary"/>
                                 </Mui.IconButton>
-                                <Mui.IconButton size="samll">
+                                <Mui.IconButton
+                                    size="small"
+                                    onClick={() => startDeleteKnowledgeSets(item.collectionname)}
+                                >
                                     <MuiIcons.Delete color="error"/>
                                 </Mui.IconButton>
                             </Mui.Box>

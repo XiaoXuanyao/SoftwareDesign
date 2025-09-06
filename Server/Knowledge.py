@@ -1,9 +1,10 @@
 from typing import Optional, Literal, Any, Dict
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
-from .Chroma.AddCollection import add_collection
-from .Chroma.ModifyCollection import insert as insert_doc
-from .Chroma.ModifyCollection import erase as erase_doc
+from .Chroma.ModifyCollection import add_collection
+from .Chroma.ModifyCollection import delete_collection
+from .Chroma.ModifyDocs import insert as insert_doc
+from .Chroma.ModifyDocs import delete as delete_doc
 from .Chroma.CheckCollections import query_all_collections
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
@@ -37,6 +38,10 @@ class CreateCollectionIn(BaseModel):
     userid: str
     description: Optional[str] = ""
     permission: Optional[Literal["private", "public"]] = "private"
+
+class DeleteCollectionIn(BaseModel):
+    collectionname: str
+    userid: str
 
 class RespOut(BaseModel):
     ok: bool
@@ -89,7 +94,7 @@ def api_delete_document(body: DocEraseIn):
             "userid": body.userid,
             "name": body.name
         }
-        ok, msg = erase_doc(mes)
+        ok, msg = delete_doc(mes)
         if not ok:
             raise HTTPException(status_code=400, detail=msg)
         return {"ok": True, "message": "删除成功"}
@@ -126,3 +131,19 @@ def api_create_collection(body: CreateCollectionIn):
         return {"ok": True, "message": "创建成功"}
     except Exception as e:
         return {"ok": False, "message": f"创建失败: {e}"}
+
+
+
+@router.post("/collections/delete", response_model=RespOut)
+def api_delete_collection(body: DeleteCollectionIn):
+    try:
+        mes = {
+            "collectionname": body.collectionname,
+            "userid": body.userid
+        }
+        ok, msg = delete_collection(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=msg)
+        return {"ok": True, "message": "删除成功"}
+    except Exception as e:
+        return {"ok": False, "message": f"删除失败: {e}"}

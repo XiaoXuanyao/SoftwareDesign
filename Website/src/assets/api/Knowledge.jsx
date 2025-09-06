@@ -85,3 +85,47 @@ export async function createKnowledgeSet(mes, callback) {
     }
     return result;
 }
+
+export async function deleteKnowledgeSets(mes, callback) {
+    const collectionnames = mes.collectionnames;
+    const userid = mes.userid;
+
+    var result = {
+        ok: true,
+        message: ["unknown"]
+    };
+    if (!userid) {
+        result.ok = false;
+        result.message = ["用户未登录"];
+    }
+    if (result.ok) {
+        try {
+            result.ok = true;
+            result.message = ["删除成功"];
+            for (let cname of collectionnames) {
+                const resp = await fetch(getConfig().apiUrl + "/knowledge/collections/delete", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        collectionname: cname,
+                        userid
+                    })
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (!resp.ok || !data || !data.ok) {
+                    result.ok = false;
+                    result.message = [data.message, data.detail, "删除失败"];
+                }
+            }
+        }
+        catch (e) {
+            result.ok = false;
+            result.message = ["网络错误"];
+            console.log(e);
+        }
+    }
+    if (callback) {
+        callback(result);
+    }
+    return result;
+}

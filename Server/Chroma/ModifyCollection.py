@@ -1,74 +1,85 @@
-from typing import Literal
-from .AddCollection import check_collection_name
 from .Init import client
 from ..Mysql.Execute import execute
-from .Embedding.Extract import extract
-from .Embedding.Embedding import embedding_chunks
+from ..Mysql.CreateTable import create_collections_table
+from .Embedding.Embedding import embedding_function
+import base64
+import hashlib
 
 
 
-def check_permission(collectionname: str, userid: str, type: Literal["w", "r"]):
-    is_valid, message = check_collection_name(collectionname)
+def encode_collection_name(name: str):
+    name_bytes = name.encode("utf-8")
+    base32_bytes = base64.b32encode(name_bytes)
+    return base32_bytes.decode("utf-8").strip("=")
+
+def hash_collection_name(name: str):
+    h = hashlib.sha256(name.encode("utf-8")).hexdigest().upper()
+    return h[:32]
+
+
+
+def check_collection_name(name: str):
+    if not (1 <= len(name) <= 90):
+        return False, "名称过长"
+    return True, ""
+
+
+
+def check_collection(name: str):
+    is_valid, message = check_collection_name(name)
     if not is_valid:
         return False, message
-    if type == "r":
-        row = execute(
-            "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s AND permission=%s LIMIT 1;",
-            [collectionname, "public"],
-        )
-        if row is not None:
-            return True, ""
     row = execute(
-        "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s AND userid=%s LIMIT 1;",
-        [collectionname, userid],
+        "SELECT 1 FROM softwaredesign.collections WHERE collectionname=%s LIMIT 1;",
+        [name],
     )
-    if row is not None:
+    if row is None:
         return True, ""
-    return False, "知识库不存在或无权限进行此操作"
+    return False, "项名称已存在"
 
 
 
-def insert(mes: dict):
-    is_valid, message = check_permission(mes["collectionname"], mes["userid"], "w")
+def add_collection(mes: dict):
+    mes["collectionname"] = encode_collection_name(mes["collectionname"])
+    mes["hash"] = hash_collection_name(mes["collectionname"])
+    is_valid, message = check_collection(mes["collectionname"])
     if not is_valid:
         return False, message
     execute(
-        f"INSERT INTO sdcollections.{mes['collectionname']} ("
-            + "name, type, description) VALUES (%s, %s, %s);",
-        [mes["name"], mes["type"], mes["description"]]
+        "INSERT INTO softwaredesign.collections (collectionname, hash, userid, description, permission) VALUES (%s, %s, %s, %s, %s);",
+        [mes["collectionname"], mes["hash"], mes["userid"], mes["description"], mes["permission"]],
     )
-    is_valid, message = extract(mes)
-    if not is_valid:
-        return False, message
-    chunks = message
-    embeddings = embedding_chunks(chunks)
-    collection = client.get_collection(mes["collectionname"])
-    documents = [ch.page_content for ch in chunks]
-    metadata = []
-    for i, c in enumerate(chunks):
-        meta = dict(c.metadata) if hasattr(c, "metadata") else {}
-        meta["doc_name"] = mes["name"]
-        meta["chunk_index"] = i
-        metadata.append(meta)
-    ids = [f"{mes['name']}-chunk-{i}" for i in range(len(chunks))]
-    collection.add(
-        documents=documents,
-        metadatas=metadata,
-        ids=ids,
-        embeddings=embeddings
+    create_collections_table(mes["hash"])
+    client.get_or_create_collection(
+        name=mes["hash"],
+        metadata={"hnsw:space": "cosine"},
+        embedding_function=embedding_function
     )
     return True, ""
 
 
 
-def erase(mes: dict):
-    is_valid, message = check_permission(mes["collectionname"], "w")
+def delete_collection(mes: dict):
+    is_valid, message = check_collection_name(mes["collectionname"])
     if not is_valid:
         return False, message
-    execute(
-        f"DELETE FROM sdcollections.{mes['collectionname']} WHERE name=%s;",
-        [mes["name"]]
+    
+    collection_name = encode_collection_name(mes["collectionname"])
+    user_id = mes["userid"]
+    row = execute(
+        "SELECT hash FROM softwaredesign.collections WHERE collectionname=%s AND userid=%s LIMIT 1;",
+        [collection_name, user_id],
     )
-    collection = client.get_collection(mes["collectionname"])
-    collection.delete(where={"doc_name": mes["name"]})
+    if row is None:
+        return False, "知识库不存在或无权限进行此操作"
+    
+    collection_hash = row["hash"]
+    execute(
+        "DELETE FROM softwaredesign.collections WHERE collectionname=%s AND userid=%s;",
+        [collection_name, user_id],
+    )
+    execute(
+        f"DROP TABLE IF EXISTS sdcollections.{collection_hash};"
+    )
+    client.delete_collection(collection_hash)
     return True, ""

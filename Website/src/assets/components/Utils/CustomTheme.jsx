@@ -32,6 +32,15 @@ const baseTheme = createTheme({
             onprimary: "#f1f1f1ff"
         }
     },
+    breakpoints: {
+        values: {
+            xs: 0,
+            sm: 500,
+            md: 1000,
+            lg: 1300,
+            xl: 1600
+        }
+    }
 });
 
 const theme = createTheme(baseTheme, {
