@@ -71,7 +71,6 @@ export function CheckPhone(phone) {
 export async function Login(mes, callback) {
     const username = mes.username;
     const password = mes.password;
-    const setUserid = mes.setUserid;
     var result = {
         ok: true,
         message: "unknown",

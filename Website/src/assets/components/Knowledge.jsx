@@ -2,32 +2,70 @@ import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import { GlobalVarsContext } from "../api/GlobalVars.jsx";
-import { queryKnowledge } from "../api/Knowledge";
+import { queryKnowledgeSet, createKnowledgeSet } from "../api/Knowledge";
 
 function MKnowledge() {
 
     const [items, setItems] = React.useState([]);
     const [batchDelete, setBatchDelete] = React.useState(false);
     const [isManager, checkIsManager] = React.useState(true);
-    queryKnowledge(
-        {
-            userid: sessionStorage.getItem("userid") || null
-        },
-        (result) => {
-            if (result.ok) {
-                setItems(result.collections || []);
+    const [newSetName, setNewSetName] = React.useState("");
+    const [createStatus, setCreateStatus] = React.useState(null);
+    const [createMessage, setCreateMessage] = React.useState("");
+    const [dirty, setDirty] = React.useState(true);
+
+    const startQueryKnowledgeSet = () => {
+        if (!dirty) return;
+        queryKnowledgeSet(
+            {
+                userid: sessionStorage.getItem("userid") || null
+            },
+            (result) => {
+                if (result.ok) {
+                    setItems(result.collections || []);
+                }
+                else {
+                    console.log("查询失败", result.message);
+                }
             }
-            else {
-                console.log("查询失败", result.message);
+        );
+        dirty && setDirty(false);
+    }
+    React.useEffect(() => startQueryKnowledgeSet(), []);
+    React.useEffect(() => startQueryKnowledgeSet(), [dirty]);
+
+    const startCreateKnowledgeSet = () => {
+        createKnowledgeSet(
+            {
+                userid: sessionStorage.getItem("userid") || null,
+                collectionname: newSetName
+            },
+            (result) => {
+                if (result.ok) {
+                    setCreateStatus("success");
+                    setCreateMessage("知识库创建成功");
+                    setDirty(true);
+                }
+                else {
+                    setCreateStatus("error");
+                    setCreateMessage("知识库创建失败: " + result.message[0]);
+                }
             }
-        }
-    );
+        );
+    };
 
     const buttonStyle = {
         "&:hover": {
             color: "white",
         }
     };
+
+    const alertStyle = {
+        mb: 2,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+    }
 
     return (
         <Mui.Box
@@ -58,20 +96,9 @@ function MKnowledge() {
                 }}>
                 知识库
             </Mui.Typography>
-            <Mui.Divider sx={{ mb: 4 }} />
-
-            <Mui.Box sx={{ mb: 4 }}>
-                {/*工具栏*/}
-                <Mui.Button variant="contained" sx={{ ...buttonStyle, mr: 2 }}>
-                    新建
-                </Mui.Button>
-                <Mui.Button disabled={!batchDelete} variant="contained" color="error" sx={{ ...buttonStyle, mr: 2 }}>
-                    批量删除
-                </Mui.Button>
-            </Mui.Box>
+            <Mui.Divider sx={{ mb: 4 }}><Mui.Chip label="管理员操作" size="small" /></Mui.Divider>
 
             {isManager && (<>
-                <Mui.Divider sx={{ mb: 4 }}><Mui.Chip label="管理员操作" size="small" /></Mui.Divider>
                 <Mui.Box sx={{ mb: 4 }}>
                     <Mui.Button
                         variant="contained"
@@ -86,9 +113,48 @@ function MKnowledge() {
                         文档管理
                     </Mui.Button>
                 </Mui.Box>
+                <Mui.Divider sx={{ mb: 4 }} />
             </>)}
 
+            <Mui.Box sx={{ mb: 4 }}>
+                {/*工具栏*/}
+                <Mui.TextField
+                    label="新建知识库名称"
+                    variant="outlined"
+                    size="small"
+                    value={newSetName}
+                    onChange={(e) => setNewSetName(e.target.value)}
+                    sx={{ mr: 2, width: 200 }}
+                />
+                <Mui.Button
+                    variant="contained"
+                    sx={{ ...buttonStyle, mr: 2 }}
+                    disabled={!newSetName}
+                    onClick={() => startCreateKnowledgeSet()}
+                >
+                    新建
+                </Mui.Button>
+                <Mui.Button disabled={!batchDelete} variant="contained" color="error" sx={{ ...buttonStyle, mr: 2 }}>
+                    批量删除
+                </Mui.Button>
+            </Mui.Box>
+            
+            {createStatus === "loading" && (
+                <Mui.Alert severity="info" sx={alertStyle}>{createMessage}</Mui.Alert>
+            )}
+            {createStatus === "error" && (
+                <Mui.Alert severity="error" sx={alertStyle}>{createMessage}</Mui.Alert>
+            )}
+            {createStatus === "success" && (
+                <Mui.Alert severity="success" sx={alertStyle}>{createMessage}</Mui.Alert>
+            )}
+
             <Mui.Divider sx={{ mb: 4 }} />
+            {items.length === 0 && (
+                <Mui.Typography variant="body1" sx={{ mt: 4, color: "text.secondary" }}>
+                    当前没有创建的知识库，点击新建创建一个知识库。
+                </Mui.Typography>
+            )}
             <Mui.Box
                 sx={{
                     width: "100%",
@@ -104,7 +170,7 @@ function MKnowledge() {
             >
                 {items.map((item) => (
                     <Mui.Card
-                        key={item.id}
+                        key={item.collectionname}
                         variant="outlined"
                         sx={{
                             aspectRatio: "1 / 1",
@@ -116,8 +182,18 @@ function MKnowledge() {
                         }}
                     >
                         <Mui.CardContent>
-                            <Mui.Typography variant="h6">{item.title}</Mui.Typography>
-                            <Mui.Typography variant="body2">{item.summary}</Mui.Typography>
+                            <Mui.Typography
+                                variant="body"
+                                sx={{ fontWeight: 'bold' }}
+                            >
+                                {item.collectionname}
+                            </Mui.Typography>
+                            <Mui.Typography
+                                variant="body2"
+                                sx= {{ mt: 1 }}
+                            >
+                                {item.description ? item.description : "暂无描述"}
+                            </Mui.Typography>
                         </Mui.CardContent>
                     </Mui.Card>
                 ))}

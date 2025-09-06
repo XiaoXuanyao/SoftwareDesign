@@ -96,7 +96,8 @@ def create_users_table():
 def create_collections_meta_table():
     create_table("softwaredesign", "collections", {
         "collectionid": "CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID())",
-        "collectionname": "VARCHAR(100) NOT NULL UNIQUE",
+        "collectionname": "VARCHAR(200) NOT NULL UNIQUE",
+        "hash": "CHAR(64) NOT NULL UNIQUE",
         "userid": "CHAR(36) NOT NULL",
         "description": "TEXT",
         "permission": "ENUM('private', 'public') NOT NULL DEFAULT 'private'",
@@ -112,7 +113,7 @@ def create_collections_meta_table():
 def create_collections_table(collectionname: str):
     create_table("sdcollections", collectionname, {
         "id": "INT AUTO_INCREMENT PRIMARY KEY",
-        "name": "VARCHAR(100) NOT NULL UNIQUE",
+        "name": "VARCHAR(200) NOT NULL UNIQUE",
         "type": "VARCHAR(50)",
         "description": "TEXT",
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",

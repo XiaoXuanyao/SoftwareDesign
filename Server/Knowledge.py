@@ -33,9 +33,16 @@ class DocEraseIn(BaseModel):
 class QueryCollectionsIn(BaseModel):
     userid: str
 
+class CreateCollectionIn(BaseModel):
+    collectionname: str
+    userid: str
+    description: Optional[str] = ""
+    permission: Optional[Literal["private", "public"]] = "private"
+
 class RespOut(BaseModel):
     ok: bool
     message: str
+    collections: Optional[list[Dict]] = None
 
 
 
@@ -102,3 +109,21 @@ def api_query_collections(body: QueryCollectionsIn):
         return {"ok": True, "message": "查询成功", "collections": msg}
     except Exception as e:
         return {"ok": False, "message": f"查询失败: {e}"}
+
+
+
+@router.post("/collections/create", response_model=RespOut)
+def api_create_collection(body: CreateCollectionIn):
+    try:
+        mes = {
+            "collectionname": body.collectionname,
+            "userid": body.userid,
+            "description": body.description,
+            "permission": body.permission
+        }
+        ok, msg = add_collection(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=msg)
+        return {"ok": True, "message": "创建成功"}
+    except Exception as e:
+        return {"ok": False, "message": f"创建失败: {e}"}
