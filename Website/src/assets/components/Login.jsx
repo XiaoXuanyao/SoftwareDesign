@@ -16,9 +16,10 @@ function MIndexContent() {
             setLoginStatus("success");
             setLoginMessage("登录成功");
             const userdata = result.userdata || {};
-            sessionStorage.setItem("userid", userdata.userid);
-            sessionStorage.setItem("username", userdata.username);
-            sessionStorage.setItem("nickname", userdata.nickname);
+            sessionStorage.setItem("userdata.userid", userdata.userid);
+            sessionStorage.setItem("userdata.username", userdata.username);
+            sessionStorage.setItem("userdata.nickname", userdata.nickname);
+            sessionStorage.setItem("userdata.role", userdata.role);
             window.location.href = "/";
         }
         else {

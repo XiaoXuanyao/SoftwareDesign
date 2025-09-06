@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import { GlobalVarsContext } from "../api/GlobalVars.jsx";
 import { queryKnowledgeSet, createKnowledgeSet } from "../api/Knowledge";
 
@@ -13,12 +14,13 @@ function MKnowledge() {
     const [createStatus, setCreateStatus] = React.useState(null);
     const [createMessage, setCreateMessage] = React.useState("");
     const [dirty, setDirty] = React.useState(true);
+    const navigate = useNavigate();
 
     const startQueryKnowledgeSet = () => {
         if (!dirty) return;
         queryKnowledgeSet(
             {
-                userid: sessionStorage.getItem("userid") || null
+                userid: sessionStorage.getItem("userdata.userid") || null
             },
             (result) => {
                 if (result.ok) {
@@ -40,7 +42,7 @@ function MKnowledge() {
     const startCreateKnowledgeSet = () => {
         createKnowledgeSet(
             {
-                userid: sessionStorage.getItem("userid") || null,
+                userid: sessionStorage.getItem("userdata.userid") || null,
                 collectionname: newSetName
             },
             (result) => {
@@ -56,6 +58,17 @@ function MKnowledge() {
             }
         );
     };
+
+    const gotoDocsManage = () => {
+        var role = sessionStorage.getItem("userdata.role");
+        if (role === "admin" || role === "expert") {
+            navigate("/manage-docs");
+        }
+        else {
+            setCreateStatus("warning");
+            setCreateMessage("只有管理员和专家才能进行文档管理");
+        }
+    }
 
     const buttonStyle = {
         "&:hover": {
@@ -105,13 +118,13 @@ function MKnowledge() {
                 <Mui.Box sx={{ mb: 4 }}>
                     <Mui.Button
                         variant="contained"
-                        href="/manage-docs"
                         sx={{
                             ...buttonStyle,
                             color: "common.white",
                             mr: 2,
                             '&&': { color: 'common.white' },
                         }}
+                        onClick={gotoDocsManage}
                     >
                         文档管理
                     </Mui.Button>

@@ -117,6 +117,11 @@ export async function Login(mes, callback) {
     return result;
 }
 
+export async function Logout() {
+    sessionStorage.clear();
+    window.location.href = "/";
+}
+
 export async function Register(mes, callback) {
     const username = mes.username;
     const nickname = mes.nickname;

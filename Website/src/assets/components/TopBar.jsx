@@ -3,9 +3,11 @@ import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import * as Router from "react-router-dom";
 import SearchBox from "./SearchBox.jsx";
+import { Logout } from "../api/Auth.jsx";
 
 function MTopBar(props) {
-    const [nickname, setNickname] = React.useState(sessionStorage.getItem("nickname") || null);
+    const nickname = sessionStorage.getItem("userdata.nickname") || null;
+    const role = sessionStorage.getItem("userdata.role") || "visitor";
 
     return (
         <Mui.AppBar>
@@ -30,13 +32,16 @@ function MTopBar(props) {
 
 
                 <Mui.Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {!nickname &&
+                    {!nickname && <>
                         <Mui.Button variant="text" href="/login" color="inherit" size="medium">
                             <MuiIcons.Login />
                             <Mui.Box component="span" sx={{ display: { xs: "none", sm: "flex" } }}>登录</Mui.Box>
                         </Mui.Button>
-                    }
-                    {nickname &&
+                        <Mui.Button variant="text" href="/register" color="inherit" size="medium" sx={{ mr: 2, display: { xs: "none", sm: "flex" }}}>
+                            注册
+                        </Mui.Button>
+                    </>}
+                    {nickname && <>
                         <Mui.Button
                             variant="text"
                             href="/login"
@@ -44,15 +49,23 @@ function MTopBar(props) {
                             size="medium"
                             sx={{ textTransform: "none" }}
                         >
-                            <MuiIcons.People />
+                            {role == "admin" && <MuiIcons.AdminPanelSettings />}
+                            {role == "expert" && <MuiIcons.School />}
+                            {role == "user" && <MuiIcons.People />}
                             <Mui.Box component="span" sx={{ display: { xs: "none", sm: "flex" } }}>
                                 <Mui.Typography>{nickname}</Mui.Typography>
                             </Mui.Box>
                         </Mui.Button>
-                    }
-                    <Mui.Button variant="text" href="/register" color="inherit" size="medium" sx={{ mr: 2, display: { xs: "none", sm: "flex" }}}>
-                        注册
-                    </Mui.Button>
+                        <Mui.Button
+                            variant="text"
+                            color="inherit"
+                            size="medium"
+                            sx={{ mr: 2, display: { xs: "none", sm: "flex" } }}
+                            onClick={Logout}
+                        >
+                            登出
+                        </Mui.Button>
+                    </>}
                 </Mui.Box>
 
             </Mui.Toolbar>
