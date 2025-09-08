@@ -1,34 +1,18 @@
-from typing import Optional, Literal, Any, Dict
-from fastapi import APIRouter, HTTPException
+from typing import Optional, Literal, Any, Dict, List
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from .Chroma.ModifyCollection import add_collection
 from .Chroma.ModifyCollection import delete_collection
-from .Chroma.ModifyDocs import insert as insert_doc
+from .Chroma.ModifyDocs import upload as upload_doc
 from .Chroma.ModifyDocs import delete as delete_doc
+from .Chroma.ModifyDocs import query as query_doc
+from .Chroma.ModifyKnowledgeSet import insert as insert_knowledgeset
+from .Chroma.ModifyKnowledgeSet import delete as delete_knowledgeset
 from .Chroma.CheckCollections import query_all_collections
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
 
 
-
-class CollectionCreateIn(BaseModel):
-    collectionname: str = Field(..., min_length=1, max_length=40)
-    userid: str
-    description: str = ""
-    permission: Literal["private", "public"] = "private"
-
-class DocInsertIn(BaseModel):
-    collectionname: str
-    userid: str
-    name: str
-    type: str
-    description: str = ""
-    extra: Dict[str, Any] = Field(default_factory=dict)
-
-class DocEraseIn(BaseModel):
-    collectionname: str
-    userid: str
-    name: str
 
 class QueryCollectionsIn(BaseModel):
     userid: str
@@ -43,67 +27,29 @@ class DeleteCollectionIn(BaseModel):
     collectionname: str
     userid: str
 
-class RespOut(BaseModel):
+class CollectionRespOut(BaseModel):
     ok: bool
     message: str
     collections: Optional[list[Dict]] = None
 
 
 
-@router.post("/collection/create", response_model=RespOut)
-def api_create_collection(body: CollectionCreateIn):
-    try:
-        ok, msg = add_collection(body.model_dump())
-        if not ok:
-            raise HTTPException(status_code=400, detail=msg)
-        return {"ok": True, "message": "创建成功"}
-    except Exception as e:
-        return {"ok": False, "message": f"创建失败: {e}"}
+class DocDeleteIn(BaseModel):
+    userid: str
+    docids: List[str]
+
+class DocQueryIn(BaseModel):
+    userid: str
+    keyword: Optional[str] = ""
+
+class DocRespOut(BaseModel):
+    ok: bool
+    message: str
+    docs: Optional[List[Dict[str, Any]]] = None
 
 
 
-@router.post("/collection/doc/insert", response_model=RespOut)
-def api_insert_document(body: DocInsertIn):
-    """
-    说明：
-    - body.extra 里的键会合并进传给 insert 的字典，兼容 extract 需要的参数
-    """
-    try:
-        mes = {
-            "collectionname": body.collectionname,
-            "userid": body.userid,
-            "name": body.name,
-            "type": body.type,
-            "description": body.description,
-            **(body.extra or {})
-        }
-        ok, msg = insert_doc(mes)
-        if not ok:
-            raise HTTPException(status_code=400, detail=msg)
-        return {"ok": True, "message": "插入成功"}
-    except Exception as e:
-        return {"ok": False, "message": f"插入失败: {e}"}
-
-
-
-@router.post("/collection/doc/delete", response_model=RespOut)
-def api_delete_document(body: DocEraseIn):
-    try:
-        mes = {
-            "collectionname": body.collectionname,
-            "userid": body.userid,
-            "name": body.name
-        }
-        ok, msg = delete_doc(mes)
-        if not ok:
-            raise HTTPException(status_code=400, detail=msg)
-        return {"ok": True, "message": "删除成功"}
-    except Exception as e:
-        return {"ok": False, "message": f"删除失败: {e}"}
-
-
-
-@router.post("/collections/query", response_model=RespOut)
+@router.post("/query", response_model=CollectionRespOut)
 def api_query_collections(body: QueryCollectionsIn):
     try:
         mes = {"userid": body.userid}
@@ -116,7 +62,7 @@ def api_query_collections(body: QueryCollectionsIn):
 
 
 
-@router.post("/collections/create", response_model=RespOut)
+@router.post("/create", response_model=CollectionRespOut)
 def api_create_collection(body: CreateCollectionIn):
     try:
         mes = {
@@ -134,7 +80,7 @@ def api_create_collection(body: CreateCollectionIn):
 
 
 
-@router.post("/collections/delete", response_model=RespOut)
+@router.post("/delete", response_model=CollectionRespOut)
 def api_delete_collection(body: DeleteCollectionIn):
     try:
         mes = {
@@ -142,6 +88,58 @@ def api_delete_collection(body: DeleteCollectionIn):
             "userid": body.userid
         }
         ok, msg = delete_collection(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=msg)
+        return {"ok": True, "message": "删除成功"}
+    except Exception as e:
+        return {"ok": False, "message": f"删除失败: {e}"}
+
+
+
+@router.post("/doc/upload", response_model=DocRespOut)
+async def api_upload_document(
+    files: list[UploadFile] = File(...),
+    path: str = Form(...),
+    userid: str = Form(...)
+):
+    try:
+        ok, msg = upload_doc(
+            {
+                "files": files,
+                "path": path,
+                "userid": userid
+            }
+        )
+        return {"ok": ok, "message": msg}
+    except Exception as e:
+        return {"ok": False, "message": f"上传失败: {e}"}
+
+
+
+@router.post("/doc/query", response_model=DocRespOut)
+def api_query_document(body: DocQueryIn):
+    try:
+        mes = {
+            "userid": body.userid,
+            "keyword": body.keyword
+        }
+        ok, msg = query_doc(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=msg)
+        return {"ok": True, "message": "查询成功", "docs": msg}
+    except Exception as e:
+        return {"ok": False, "message": f"查询失败: {e}"}
+
+
+
+@router.post("/doc/delete", response_model=DocRespOut)
+def api_delete_document(body: DocDeleteIn):
+    try:
+        mes = {
+            "userid": body.userid,
+            "docids": body.docids
+        }
+        ok, msg = delete_doc(mes)
         if not ok:
             raise HTTPException(status_code=400, detail=msg)
         return {"ok": True, "message": "删除成功"}

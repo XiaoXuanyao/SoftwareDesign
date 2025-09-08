@@ -94,6 +94,21 @@ def create_users_table():
 
 
 
+def create_docs_meta_table():
+    create_table("softwaredesign", "docs", {
+        "docid": "CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID())",
+        "docname": "VARCHAR(200) NOT NULL",
+        "uploaduserid": "CHAR(36) NOT NULL",
+        "path": "VARCHAR(50)",
+        "description": "TEXT",
+        "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    },
+    [
+        "FOREIGN KEY (`uploaduserid`) REFERENCES `users`(`userid`) ON DELETE CASCADE"
+    ])
+
+
+
 def create_collections_meta_table():
     create_table("softwaredesign", "collections", {
         "collectionid": "CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID())",
@@ -132,4 +147,6 @@ def check():
         create_users_table()
     if not check_table("softwaredesign", "collections"):
         create_collections_meta_table()
+    if not check_table("softwaredesign", "docs"):
+        create_docs_meta_table()
     Debug.log("Debug", "MySQL数据库检验完成")

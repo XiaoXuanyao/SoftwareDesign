@@ -4,31 +4,31 @@ import * as MuiIcons from "@mui/icons-material";
 import MUploadFiles from "../ManageDocs/UploadFiles";
 import MModifyFile from "../ManageDocs/ModifyFile";
 import MFilterFiles from "../ManageDocs/FilterFiles";
+import { queryDocs } from "../../api/Knowledge";
 
-function MManageDocs() {
-    const [docs, setDocs] = React.useState(() => Array.from({ length: 20 }, (_, i) => ({
-            id: i + 1,
-            filename: `示例文档-${i + 1}.docx`,
-            path: `文件夹 #${i + 1}`
-        }))
-    );
-
+function MManageDocs(props) {
+    const [dirty, setDirty] = React.useState(false);
+    const [docs, setDocs] = React.useState([]);
     const [selectedFile, setSelectedFile] = React.useState(null);
     const [keyword, setKeyword] = React.useState("")
-    const normalized = keyword.trim().toLowerCase();
 
-    const uploadFiles = (e) => {
-
-    };
+    React.useEffect(() => {
+        queryDocs(
+            {
+                userid: sessionStorage.getItem("userdata.userid"),
+                keyword
+            },
+            (res) => {
+                if (res.ok) {
+                    setDocs(res.docs || []);
+                }
+            }
+        );
+    }, [dirty, keyword]);
 
     const deleteFiles = (files) => {
-
+        
     };
-
-    const filtered = React.useMemo(() => {
-        if (!normalized) return docs;
-        return docs.filter((d) => d.filename.toLowerCase().includes(normalized));
-    }, [docs, normalized]);
 
     const buttonStyle = {
         "&:hover": {
@@ -85,8 +85,8 @@ function MManageDocs() {
                     }}
                 >
                     <MUploadFiles
-                        uploadFiles={uploadFiles}
                         buttonStyle={buttonStyle}
+                        setDirty={setDirty}
                     />
                     <MModifyFile
                         selectedFile={selectedFile}
@@ -97,7 +97,6 @@ function MManageDocs() {
                 <Mui.Divider orientation="vertical" flexItem />
                 <MFilterFiles
                     docs={docs}
-                    filtered={filtered}
                     setSelectedFile={setSelectedFile}
                     keyword={keyword}
                     setKeyword={setKeyword}

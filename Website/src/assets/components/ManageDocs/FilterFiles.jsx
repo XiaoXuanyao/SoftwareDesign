@@ -7,7 +7,6 @@ function MFilterFiles(props) {
     const keyword = props.keyword;
     const setKeyword = props.setKeyword;
     const docs = props.docs;
-    const filtered = props.filtered;
     const normalized = keyword.trim().toLowerCase();
     
     // 高亮匹配文本
@@ -77,7 +76,7 @@ function MFilterFiles(props) {
                 }}
             >
                 <Mui.Typography variant="body2" color="text.secondary">
-                    共 {docs.length} 个文档 · 当前显示 {filtered.length} 个
+                    共 {docs.length} 个文档
                 </Mui.Typography>
             </Mui.Box>
 
@@ -94,13 +93,13 @@ function MFilterFiles(props) {
                 }}
             >
                 <Mui.List dense disablePadding>
-                    {filtered.map((doc) => (
+                    {docs.map((doc) => (
                         <Mui.ListItem
-                            key={doc.id}
+                            key={doc.docid}
                             divider
                             secondaryAction={<>
                                 <Mui.Button>
-                                    <Mui.Typography variant="caption" color="text.secondary">
+                                    <Mui.Typography variant="caption" color="text.secondary" sx={{ textTransform: "none" }}>
                                         {doc.path}
                                     </Mui.Typography>
                                 </Mui.Button>
@@ -122,10 +121,10 @@ function MFilterFiles(props) {
                                     }}>
                                         <Mui.Typography
                                             variant="body2"
-                                            sx={{ fontWeight: 500 }}
-                                            title={doc.filename}
+                                            sx={{ fontWeight: 500, textTransform: "none"}}
+                                            title={doc.docname}
                                         >
-                                            {highlight(doc.filename)}
+                                            {highlight(doc.docname)}
                                         </Mui.Typography>
                                     </Mui.Button>
                                 }
@@ -133,7 +132,7 @@ function MFilterFiles(props) {
                         </Mui.ListItem>
                     ))}
 
-                    {filtered.length === 0 && (
+                    {docs.length === 0 && (
                         <Mui.ListItem>
                             <Mui.ListItemText
                                 primary={

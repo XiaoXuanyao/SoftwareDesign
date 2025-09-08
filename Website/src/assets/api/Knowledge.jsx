@@ -17,7 +17,7 @@ export async function queryKnowledgeSet(mes, callback) {
     }
     if (result.ok) {
         try {
-            const resp = await fetch(getConfig().apiUrl + "/knowledge/collections/query", {
+            const resp = await fetch(getConfig().apiUrl + "/knowledge/query", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userid })
@@ -59,7 +59,7 @@ export async function createKnowledgeSet(mes, callback) {
     }
     if (result.ok) {
         try {
-            const resp = await fetch(getConfig().apiUrl + "/knowledge/collections/create", {
+            const resp = await fetch(getConfig().apiUrl + "/knowledge/create", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ collectionname, userid })
@@ -103,7 +103,7 @@ export async function deleteKnowledgeSets(mes, callback) {
             result.ok = true;
             result.message = ["删除成功"];
             for (let cname of collectionnames) {
-                const resp = await fetch(getConfig().apiUrl + "/knowledge/collections/delete", {
+                const resp = await fetch(getConfig().apiUrl + "/knowledge/delete", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -124,6 +124,91 @@ export async function deleteKnowledgeSets(mes, callback) {
             console.log(e);
         }
     }
+    if (callback) {
+        callback(result);
+    }
+    return result;
+}
+
+export async function uploadDocs(mes, callback) {
+    const formData = mes.formData;
+    const setProgress = mes.setProgress;
+
+    try {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", getConfig().apiUrl + "/knowledge/doc/upload", true);
+
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = Math.round((event.loaded / event.total) * 100);
+                setProgress(percentComplete);
+            }
+        };
+
+        xhr.onload = function () {
+            callback({
+                ok: xhr.status === 200,
+                message: xhr.status === 200 ? ["上传成功"] : ["上传失败"]
+            })
+        }
+
+        xhr.onerror = function () {
+            callback({
+                ok: false,
+                message: ["网络错误"]
+            })
+        }
+        
+        xhr.send(formData);
+    }
+    catch (e) {
+        callback({
+            ok: false,
+            message: ["网络错误"]
+        });
+        console.log(e);
+    }
+}
+
+export async function queryDocs(mes, callback) {
+    const userid = mes.userid;
+    const keyword = mes.keyword || "";
+
+    let result = {
+        ok: true,
+        message: ["unknown"],
+        docs: null
+    };
+
+    if (!userid) {
+        result.ok = false;
+        result.message = ["用户未登录"];
+    }
+
+    if (result.ok) {
+        try {
+            const resp = await fetch(getConfig().apiUrl + "/knowledge/doc/query", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid, keyword })
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || !data || !data.ok) {
+                result.ok = false;
+                result.message = [data.message, data.detail, "检索失败"];
+            } else {
+                result.ok = true;
+                result.message = ["检索成功"];
+                result.docs = data.docs;
+                console.log(data);
+            }
+        } catch (e) {
+            result.ok = false;
+            result.message = ["网络错误"];
+            console.log(e);
+        }
+    }
+
     if (callback) {
         callback(result);
     }
