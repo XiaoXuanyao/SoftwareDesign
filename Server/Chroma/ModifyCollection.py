@@ -12,6 +12,11 @@ def encode_collection_name(name: str):
     base32_bytes = base64.b32encode(name_bytes)
     return base32_bytes.decode("utf-8").strip("=")
 
+def decode_collection_name(name: str):
+    name_bytes = name.encode('utf-8')
+    base32_bytes = base64.b32decode(name_bytes + b"=" * ((8 - len(name_bytes) % 8) % 8))
+    return base32_bytes.decode('utf-8')
+
 def hash_collection_name(name: str, user_id: str):
     h = hashlib.sha256((user_id + ":" + name).encode("utf-8")).hexdigest().upper()
     return h[:32]
@@ -41,7 +46,7 @@ def check_collection(name: str):
 
 def add_collection(mes: dict):
     mes["collectionname"] = encode_collection_name(mes["collectionname"])
-    mes["hash"] = hash_collection_name(mes["collectionname"])
+    mes["hash"] = hash_collection_name(mes["collectionname"], mes["userid"])
     is_valid, message = check_collection(mes["collectionname"])
     if not is_valid:
         return False, message
@@ -56,6 +61,22 @@ def add_collection(mes: dict):
         embedding_function=embedding_function
     )
     return True, ""
+
+
+
+def query_all_collections(mes: dict):
+    rows = execute(
+        "SELECT collectionid, collectionname, userid, description, permission FROM softwaredesign.collections "
+        + "WHERE userid=%s;",
+        [mes["userid"]],
+        dictionary=True,
+        fetch="all",
+    )
+    if (rows is not None):
+        for row in rows:
+            row["collectionname"] = decode_collection_name(row["collectionname"])
+    return True, rows
+
 
 
 

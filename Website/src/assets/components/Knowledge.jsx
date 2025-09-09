@@ -3,6 +3,7 @@ import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { GlobalVarsContext } from "../api/GlobalVars.jsx";
+import MManageSet from "./Knowledge/ManageSet.jsx";
 import {
     queryKnowledgeSet,
     createKnowledgeSet,
@@ -19,6 +20,9 @@ function MKnowledge() {
     const [selectedItems, setSelectedItems] = React.useState([]);
     const role = sessionStorage.getItem("userdata.role") || "visitor";
     const navigate = useNavigate();
+    
+    const [openManageSet, setOpenManageSet] = React.useState(false);
+    const [selectedSet, setSelectedSet] = React.useState(null);
 
     const startQueryKnowledgeSet = () => {
         if (!dirty) return;
@@ -110,6 +114,11 @@ function MKnowledge() {
         );
     }
 
+    const editKnowledgeSet = (which) => {
+        setSelectedSet(which);
+        setOpenManageSet(true);
+    }
+
     const buttonStyle = {
         "&:hover": {
             color: "white",
@@ -152,9 +161,9 @@ function MKnowledge() {
                 }}>
                 知识库
             </Mui.Typography>
-            <Mui.Divider sx={{ mb: 4 }}><Mui.Chip label="管理员操作" size="small" /></Mui.Divider>
 
             {(role === "admin" || role === "expert") && (<>
+                <Mui.Divider sx={{ mb: 4 }}><Mui.Chip label="管理员操作" size="small" /></Mui.Divider>
                 <Mui.Box sx={{ mb: 4 }}>
                     <Mui.Button
                         variant="contained"
@@ -169,9 +178,9 @@ function MKnowledge() {
                         文档管理
                     </Mui.Button>
                 </Mui.Box>
-                <Mui.Divider sx={{ mb: 4 }} />
             </>)}
 
+            <Mui.Divider sx={{ mb: 4 }} />
             <Mui.Box sx={{ mb: 4 }}>
                 {/*工具栏*/}
                 <Mui.TextField
@@ -285,7 +294,10 @@ function MKnowledge() {
                                 alignItems: "center",
                                 mt: 0.5
                             }}>
-                                <Mui.IconButton size="small">
+                                <Mui.IconButton
+                                    size="small"
+                                    onClick={() => editKnowledgeSet(item.collectionid)}
+                                >
                                     <MuiIcons.Edit color="primary"/>
                                 </Mui.IconButton>
                                 <Mui.IconButton
@@ -300,6 +312,12 @@ function MKnowledge() {
                     </Mui.Card>
                 ))}
             </Mui.Box>
+
+            <MManageSet
+                open={openManageSet}
+                setOpen={setOpenManageSet}
+                selectedSet={selectedSet}
+            />
 
         </Mui.Box>
     );

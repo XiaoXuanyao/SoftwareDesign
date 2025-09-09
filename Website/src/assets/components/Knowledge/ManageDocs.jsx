@@ -4,13 +4,18 @@ import * as MuiIcons from "@mui/icons-material";
 import MUploadFiles from "../ManageDocs/UploadFiles";
 import MModifyFile from "../ManageDocs/ModifyFile";
 import MFilterFiles from "../ManageDocs/FilterFiles";
-import { queryDocs } from "../../api/Knowledge";
+import {
+    queryDocs,
+    deleteDocs
+} from "../../api/Knowledge";
 
 function MManageDocs(props) {
     const [dirty, setDirty] = React.useState(false);
     const [docs, setDocs] = React.useState([]);
     const [selectedFile, setSelectedFile] = React.useState(null);
     const [keyword, setKeyword] = React.useState("")
+
+    const [openModify, setOpenModify] = React.useState(false);
 
     React.useEffect(() => {
         queryDocs(
@@ -26,8 +31,23 @@ function MManageDocs(props) {
         );
     }, [dirty, keyword]);
 
-    const deleteFiles = (files) => {
-        
+    const onclickFile = (file) => {
+        setSelectedFile(file);
+        setOpenModify(true);
+    }
+
+    const deleteFiles = (docids) => {
+        deleteDocs(
+            {
+                userid: sessionStorage.getItem("userdata.userid"),
+                docids: docids
+            },
+            (res) => {
+                if (res.ok) {
+                    setDirty(!dirty);
+                }
+            }
+        );
     };
 
     const buttonStyle = {
@@ -92,15 +112,18 @@ function MManageDocs(props) {
                         selectedFile={selectedFile}
                         setSelectedFile={setSelectedFile}
                         buttonStyle={buttonStyle}
+                        open={openModify}
+                        setOpen={setOpenModify}
                     />
                 </Mui.Box>
                 <Mui.Divider orientation="vertical" flexItem />
                 <MFilterFiles
                     docs={docs}
-                    setSelectedFile={setSelectedFile}
+                    setSelectedFile={onclickFile}
                     keyword={keyword}
                     setKeyword={setKeyword}
                     buttonStyle={buttonStyle}
+                    deleteFiles={deleteFiles}
                 />
             </Mui.Box>
         </Mui.Box>

@@ -1,5 +1,7 @@
 import mysql.connector
 from ...Chroma.Init import client
+from ...Chroma.Init import DOCS_DIR
+import shutil
 
 ADMIN_CONFIG = {
     "host": "localhost",
@@ -21,7 +23,9 @@ new_password = "d9j>nM&1!Hp2"
 try:
     cur.execute("DROP DATABASE IF EXISTS softwaredesign;")
     cur.execute("DROP DATABASE IF EXISTS sdcollections;")
-    client.reset()
+    for c in client.list_collections():
+        client.delete_collection(c.name)
+    shutil.rmtree(DOCS_DIR, ignore_errors=True)
 
 except mysql.connector.Error as err:
     print(f"Error: {err}")

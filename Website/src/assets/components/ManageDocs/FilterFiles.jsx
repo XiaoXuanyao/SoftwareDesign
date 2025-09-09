@@ -3,12 +3,14 @@ import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 
 function MFilterFiles(props) {
+    const selectedFile = props.selectedFile;
     const setSelectedFile = props.setSelectedFile;
     const keyword = props.keyword;
     const setKeyword = props.setKeyword;
     const docs = props.docs;
     const normalized = keyword.trim().toLowerCase();
     const buttonStyle = props.buttonStyle;
+    const deleteFiles = props.deleteFiles;
     
     const [selectedDocs, setSelectedDocs] = React.useState([]);
     
@@ -114,6 +116,7 @@ function MFilterFiles(props) {
                         startIcon={<MuiIcons.Delete />}
                         disabled={selectedDocs.length === 0}
                         sx={buttonStyle}
+                        onClick={() => deleteFiles(selectedDocs)}
                     >
                         批量删除
                     </Mui.Button>
@@ -138,12 +141,14 @@ function MFilterFiles(props) {
                             key={doc.docid}
                             divider
                             secondaryAction={<>
-                                <Mui.Button>
+                                <Mui.Button onClick={() => {
+                                    setSelectedFile(doc)
+                                }}>
                                     <Mui.Typography variant="caption" color="text.secondary" sx={{ textTransform: "none" }}>
-                                        {doc.path}
+                                        {(doc.path.length === 0 || doc.path[0] !== "/") ? "/" + doc.path : doc.path}
                                     </Mui.Typography>
                                 </Mui.Button>
-                                <Mui.IconButton>
+                                <Mui.IconButton onClick={() => deleteFiles([doc.docid])}>
                                     <MuiIcons.Delete fontSize="small" sx={{ color: "error.main" }} />
                                 </Mui.IconButton>
                             </>}

@@ -3,12 +3,12 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, Field
 from .Chroma.ModifyCollection import add_collection
 from .Chroma.ModifyCollection import delete_collection
+from .Chroma.ModifyCollection import query_all_collections
 from .Chroma.ModifyDocs import upload as upload_doc
 from .Chroma.ModifyDocs import delete as delete_doc
 from .Chroma.ModifyDocs import query as query_doc
 from .Chroma.ModifyKnowledgeSet import insert as insert_knowledgeset
 from .Chroma.ModifyKnowledgeSet import query as query_knowledgeset
-from .Chroma.CheckCollections import query_all_collections
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
 

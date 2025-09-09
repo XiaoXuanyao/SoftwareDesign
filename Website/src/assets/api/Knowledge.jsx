@@ -146,10 +146,33 @@ export async function uploadDocs(mes, callback) {
         };
 
         xhr.onload = function () {
-            callback({
-                ok: xhr.status === 200,
-                message: xhr.status === 200 ? ["上传成功"] : ["上传失败"]
-            })
+            let result = {
+                ok: true,
+                message: ["unknown"]
+            }
+            let data = JSON.parse(xhr.response || null);
+            if (!data) {
+                try {
+                    data = JSON.parse(xhr.responseText || "{}");
+                }
+                catch (e) {
+                    result.ok = false;
+                    result.message = ["上传失败，返回数据格式错误"];
+                }
+            }
+            if (result.ok && xhr.status < 200 && xhr.status >= 300) {
+                result.ok = false;
+                result.message = ["网络错误"];
+            }
+            if (result.ok && !data) {
+                result.ok = false;
+                result.message = ["上传失败：无响应数据"];
+            }
+            if (result.ok) {
+                result.ok = data.ok;
+                result.message = [data.message, data.detail, "上传失败"];
+            }
+            callback(result);
         }
 
         xhr.onerror = function () {
@@ -200,7 +223,6 @@ export async function queryDocs(mes, callback) {
                 result.ok = true;
                 result.message = ["检索成功"];
                 result.docs = data.docs;
-                console.log(data);
             }
         } catch (e) {
             result.ok = false;

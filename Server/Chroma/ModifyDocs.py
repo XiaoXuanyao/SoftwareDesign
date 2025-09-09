@@ -17,8 +17,9 @@ def check_admin_or_expert(userid: str):
 
 
 def check_doc_name(docname: str):
-    if not docname.endswith((".pdf", ".docx", ".txt")):
+    if not docname.endswith((".pdf", ".doc", ".docx", ".txt")):
         return False, "仅支持上传 PDF、Word、TXT 格式的文件"
+    return True, ""
 
 
 
@@ -28,24 +29,21 @@ def upload(mes: dict):
         return False, message
     
     try:
-        files = mes["files"]
-        path = mes["path"]
-        save_dir = DOCS_DIR / path.strip("/").replace("..", "")
+        save_dir = DOCS_DIR / mes["path"].strip("/").replace("..", "")
         os.makedirs(save_dir, exist_ok=True)
 
-        for file in files:
-            filename = getattr(file, "filename", "unknown")
-            is_valid, message = check_doc_name(filename)
+        for file in mes["files"]:
+            is_valid, message = check_doc_name(file.filename)
             if not is_valid:
                 return False, message
 
-            file_path = os.path.join(save_dir, filename)
+            file_path = os.path.join(save_dir, file.filename)
             with open(file_path, "wb") as f:
                 content = file.file.read() if hasattr(file, "file") else file.read()
                 f.write(content)
             execute(
                 "INSERT INTO softwaredesign.docs (docname, uploaduserid, path, description) VALUES (%s, %s, %s, %s);",
-                [filename, mes["userid"], path, mes.get("description", "")]
+                [file.filename, mes["userid"], mes["path"], mes.get("description", "")]
             )
         return True, ""
 
