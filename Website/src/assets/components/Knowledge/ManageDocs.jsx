@@ -100,6 +100,7 @@ function MManageDocs(props) {
                     setSelectedFile={setSelectedFile}
                     keyword={keyword}
                     setKeyword={setKeyword}
+                    buttonStyle={buttonStyle}
                 />
             </Mui.Box>
         </Mui.Box>

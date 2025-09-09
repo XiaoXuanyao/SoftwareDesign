@@ -1,6 +1,5 @@
-# 仅管理员在本地运行此文件，不参与项目程序运行。
-
 import mysql.connector
+from ...Chroma.Init import client
 
 ADMIN_CONFIG = {
     "host": "localhost",
@@ -22,6 +21,8 @@ new_password = "d9j>nM&1!Hp2"
 try:
     cur.execute("DROP DATABASE IF EXISTS softwaredesign;")
     cur.execute("DROP DATABASE IF EXISTS sdcollections;")
+    client.reset()
+
 except mysql.connector.Error as err:
     print(f"Error: {err}")
 finally:

@@ -214,3 +214,49 @@ export async function queryDocs(mes, callback) {
     }
     return result;
 }
+
+export async function deleteDocs(mes, callback) {
+    const docids = mes.docids;
+    const userid = mes.userid;
+    
+    let result = {
+        ok: true,
+        message: ["unknown"]
+    };
+
+    if (!userid) {
+        result.ok = false;
+        result.message = ["用户未登录"];
+    }
+    if (!docids || !docids.length) {
+        result.ok = false;
+        result.message = ["未选择要删除的文档"];
+    }
+
+    if (result.ok) {
+        try {
+            const resp = await fetch(getConfig().apiUrl + "/knowledge/doc/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid, docids })
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || !data || !data.ok) {
+                result.ok = false;
+                result.message = [data.message, data.detail, "删除失败"];
+            } else {
+                result.ok = true;
+                result.message = ["删除成功"];
+            }
+        } catch (e) {
+            result.ok = false;
+            result.message = ["网络错误"];
+            console.log(e);
+        }
+    }
+
+    if (callback) {
+        callback(result);
+    }
+    return result;
+}

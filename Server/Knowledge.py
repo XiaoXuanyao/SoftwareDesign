@@ -7,7 +7,7 @@ from .Chroma.ModifyDocs import upload as upload_doc
 from .Chroma.ModifyDocs import delete as delete_doc
 from .Chroma.ModifyDocs import query as query_doc
 from .Chroma.ModifyKnowledgeSet import insert as insert_knowledgeset
-from .Chroma.ModifyKnowledgeSet import delete as delete_knowledgeset
+from .Chroma.ModifyKnowledgeSet import query as query_knowledgeset
 from .Chroma.CheckCollections import query_all_collections
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
@@ -46,6 +46,17 @@ class DocRespOut(BaseModel):
     ok: bool
     message: str
     docs: Optional[List[Dict[str, Any]]] = None
+
+
+
+class SetInsertIn(BaseModel):
+    collectionname: str
+    userid: str
+    docid: str
+
+class SetQueryIn(BaseModel):
+    collectionname: str
+    userid: str
 
 
 
@@ -145,3 +156,36 @@ def api_delete_document(body: DocDeleteIn):
         return {"ok": True, "message": "删除成功"}
     except Exception as e:
         return {"ok": False, "message": f"删除失败: {e}"}
+
+
+
+@router.post("/set/insert", response_model=DocRespOut)
+def api_insert_knowledge_set(body: SetInsertIn):
+    try:
+        mes = {
+            "collectionname": body.collectionname,
+            "userid": body.userid,
+            "docid": body.docid
+        }
+        ok, msg = insert_knowledgeset(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=msg)
+        return {"ok": True, "message": msg}
+    except Exception as e:
+        return {"ok": False, "message": f"添加失败: {e}"}
+
+
+
+@router.post("/set/query", response_model=DocRespOut)
+def api_query_knowledge_set(body: SetQueryIn):
+    try:
+        mes = {
+            "collectionname": body.collectionname,
+            "userid": body.userid
+        }
+        ok, data = query_knowledgeset(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=data)
+        return {"ok": True, "message": "查询成功", "docs": data}
+    except Exception as e:
+        return {"ok": False, "message": f"查询失败: {e}"}

@@ -12,8 +12,8 @@ def encode_collection_name(name: str):
     base32_bytes = base64.b32encode(name_bytes)
     return base32_bytes.decode("utf-8").strip("=")
 
-def hash_collection_name(name: str):
-    h = hashlib.sha256(name.encode("utf-8")).hexdigest().upper()
+def hash_collection_name(name: str, user_id: str):
+    h = hashlib.sha256((user_id + ":" + name).encode("utf-8")).hexdigest().upper()
     return h[:32]
 
 

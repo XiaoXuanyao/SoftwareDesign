@@ -7,7 +7,7 @@ import os
 
 
 def extract_pdf(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
-    path = DOCS_DIR + "/" + mes["name"]
+    path = mes["path"]
     pdf_abs_path = os.path.abspath(path)
     if not os.path.exists(pdf_abs_path):
         return False, "文件不存在"
@@ -28,7 +28,7 @@ def extract_pdf(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
 
 
 def extract_word(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
-    path = DOCS_DIR + "/" + mes["name"]
+    path = mes["path"]
     pdf_abs_path = os.path.abspath(path)
     if not os.path.exists(pdf_abs_path):
         return False, "文件不存在"
@@ -48,7 +48,7 @@ def extract_word(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
 
 
 def extract_txt(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
-    path = DOCS_DIR + "/" + mes["name"]
+    path = mes["path"]
     pdf_abs_path = os.path.abspath(path)
     if not os.path.exists(pdf_abs_path):
         return False, "文件不存在"

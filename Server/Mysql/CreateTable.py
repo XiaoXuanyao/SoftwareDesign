@@ -98,13 +98,13 @@ def create_docs_meta_table():
     create_table("softwaredesign", "docs", {
         "docid": "CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID())",
         "docname": "VARCHAR(200) NOT NULL",
-        "uploaduserid": "CHAR(36) NOT NULL",
+        "uploaduserid": "CHAR(36)",
         "path": "VARCHAR(50)",
         "description": "TEXT",
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     },
     [
-        "FOREIGN KEY (`uploaduserid`) REFERENCES `users`(`userid`) ON DELETE CASCADE"
+        "FOREIGN KEY (`uploaduserid`) REFERENCES `users`(`userid`) ON DELETE SET NULL"
     ])
 
 
@@ -112,7 +112,7 @@ def create_docs_meta_table():
 def create_collections_meta_table():
     create_table("softwaredesign", "collections", {
         "collectionid": "CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID())",
-        "collectionname": "VARCHAR(200) NOT NULL UNIQUE",
+        "collectionname": "VARCHAR(200) NOT NULL",
         "hash": "CHAR(64) NOT NULL UNIQUE",
         "userid": "CHAR(36) NOT NULL",
         "description": "TEXT",
@@ -121,6 +121,7 @@ def create_collections_meta_table():
         "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
     },
     [
+        "UNIQUE KEY `uq_collectionname_user` (`collectionname`, `userid`)",
         "FOREIGN KEY (`userid`) REFERENCES `users`(`userid`) ON DELETE CASCADE"
     ])
 
@@ -128,12 +129,13 @@ def create_collections_meta_table():
 
 def create_collections_table(collectionname: str):
     create_table("sdcollections", collectionname, {
-        "id": "INT AUTO_INCREMENT PRIMARY KEY",
-        "name": "VARCHAR(200) NOT NULL UNIQUE",
+        "vecid": "INT AUTO_INCREMENT PRIMARY KEY",
+        "docname": "VARCHAR(200) NOT NULL",
+        "docid": "CHAR(36) NOT NULL UNIQUE",
+        "uploaduserid": "CHAR(36) NOT NULL",
         "type": "VARCHAR(50)",
         "description": "TEXT",
         "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-        "updated_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
     })
 
 

@@ -16,6 +16,12 @@ def check_admin_or_expert(userid: str):
 
 
 
+def check_doc_name(docname: str):
+    if not docname.endswith((".pdf", ".docx", ".txt")):
+        return False, "仅支持上传 PDF、Word、TXT 格式的文件"
+
+
+
 def upload(mes: dict):
     is_valid, message = check_admin_or_expert(mes["userid"])
     if not is_valid:
@@ -29,6 +35,10 @@ def upload(mes: dict):
 
         for file in files:
             filename = getattr(file, "filename", "unknown")
+            is_valid, message = check_doc_name(filename)
+            if not is_valid:
+                return False, message
+
             file_path = os.path.join(save_dir, filename)
             with open(file_path, "wb") as f:
                 content = file.file.read() if hasattr(file, "file") else file.read()
