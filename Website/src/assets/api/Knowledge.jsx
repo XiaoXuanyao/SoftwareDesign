@@ -282,3 +282,60 @@ export async function deleteDocs(mes, callback) {
     }
     return result;
 }
+
+export async function renameOrMoveDoc(mes, callback) {
+    const docid = mes.docid;
+    const newDocName = mes.newDocName;
+    const newPath = mes.newPath;
+    const userid = mes.userid;
+
+    let result = {
+        ok: true,
+        message: ["unknown"]
+    };
+
+    if (!userid) {
+        result.ok = false;
+        result.message = ["用户未登录"];
+    }
+    if (!docid) {
+        result.ok = false;
+        result.message = ["文档ID不能为空"];
+    }
+    if (!newDocName) {
+        result.ok = false;
+        result.message = ["新文档名称不能为空"];
+    }
+    
+    if (result.ok) {
+        try {
+            const resp = await fetch(getConfig().apiUrl + "/knowledge/doc/move", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    userid,
+                    docid,
+                    newname: newDocName,
+                    newpath: newPath
+                })
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || !data || !data.ok) {
+                result.ok = false;
+                result.message = [data.message, data.detail, "移动失败"];
+            } else {
+                result.ok = true;
+                result.message = ["移动成功"];
+            }
+        } catch (e) {
+            result.ok = false;
+            result.message = ["网络错误"];
+            console.log(e);
+        }
+    }
+
+    if (callback) {
+        callback(result);
+    }
+    return result;
+}

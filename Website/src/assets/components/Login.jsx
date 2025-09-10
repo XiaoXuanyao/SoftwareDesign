@@ -10,6 +10,7 @@ function MIndexContent() {
     const [password, setPassword] = React.useState("");
     const [loginStatus, setLoginStatus] = React.useState(null);
     const [loginMessage, setLoginMessage] = React.useState("");
+    const [onProcess, setOnProcess] = React.useState(false);
 
     const loginCallback = (result) => {
         if (result.ok) {
@@ -20,9 +21,13 @@ function MIndexContent() {
             sessionStorage.setItem("userdata.username", userdata.username);
             sessionStorage.setItem("userdata.nickname", userdata.nickname);
             sessionStorage.setItem("userdata.role", userdata.role);
-            window.location.href = "/";
+            setTimeout(() => {
+                setOnProcess(false);
+                window.location.href = "/";
+            }, 600);
         }
         else {
+            setOnProcess(false);
             setLoginStatus("error");
             setLoginMessage(result.message[0] || "登录失败");
         }
@@ -36,6 +41,7 @@ function MIndexContent() {
             return;
         }
         setLoginStatus("loading");
+        setOnProcess(true);
         Login(
             {
                 username,
@@ -139,6 +145,7 @@ function MIndexContent() {
                             color: "text.onprimary"
                         }
                     }}
+                    disabled={onProcess}
                 >
                     登录
                 </Mui.Button>

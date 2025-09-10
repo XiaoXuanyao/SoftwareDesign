@@ -10,7 +10,7 @@ import {
 } from "../../api/Knowledge";
 
 function MManageDocs(props) {
-    const [dirty, setDirty] = React.useState(false);
+    const [dirty, setDirty] = React.useState(true);
     const [docs, setDocs] = React.useState([]);
     const [selectedFile, setSelectedFile] = React.useState(null);
     const [keyword, setKeyword] = React.useState("")
@@ -18,6 +18,7 @@ function MManageDocs(props) {
     const [openModify, setOpenModify] = React.useState(false);
 
     React.useEffect(() => {
+        if (!dirty) return;
         queryDocs(
             {
                 userid: sessionStorage.getItem("userdata.userid"),
@@ -26,6 +27,7 @@ function MManageDocs(props) {
             (res) => {
                 if (res.ok) {
                     setDocs(res.docs || []);
+                    setDirty(false);
                 }
             }
         );
@@ -114,6 +116,7 @@ function MManageDocs(props) {
                         buttonStyle={buttonStyle}
                         open={openModify}
                         setOpen={setOpenModify}
+                        setDirty={setDirty}
                     />
                 </Mui.Box>
                 <Mui.Divider orientation="vertical" flexItem />

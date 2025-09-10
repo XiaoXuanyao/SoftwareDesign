@@ -7,6 +7,7 @@ from .Chroma.ModifyCollection import query_all_collections
 from .Chroma.ModifyDocs import upload as upload_doc
 from .Chroma.ModifyDocs import delete as delete_doc
 from .Chroma.ModifyDocs import query as query_doc
+from .Chroma.ModifyDocs import move as move_doc
 from .Chroma.ModifyKnowledgeSet import insert as insert_knowledgeset
 from .Chroma.ModifyKnowledgeSet import query as query_knowledgeset
 
@@ -41,6 +42,12 @@ class DocDeleteIn(BaseModel):
 class DocQueryIn(BaseModel):
     userid: str
     keyword: Optional[str] = ""
+
+class DocMoveIn(BaseModel):
+    userid: str
+    docid: str
+    newname: str
+    newpath: str
 
 class DocRespOut(BaseModel):
     ok: bool
@@ -156,6 +163,24 @@ def api_delete_document(body: DocDeleteIn):
         return {"ok": True, "message": "删除成功"}
     except Exception as e:
         return {"ok": False, "message": f"删除失败: {e}"}
+
+
+
+@router.post("/doc/move", response_model=DocRespOut)
+def api_move_document(body: DocMoveIn):
+    try:
+        mes = {
+            "userid": body.userid,
+            "docid": body.docid,
+            "newname": body.newname,
+            "newpath": body.newpath
+        }
+        ok, msg = move_doc(mes)
+        if not ok:
+            raise HTTPException(status_code=400, detail=msg)
+        return {"ok": True, "message": "移动成功"}
+    except Exception as e:
+        return {"ok": False, "message": f"移动失败: {e}"}
 
 
 
