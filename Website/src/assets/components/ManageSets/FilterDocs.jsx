@@ -1,17 +1,23 @@
 import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
+import {
+    queryDocs,
+    appendDocsIntoSet
+} from "../../api/Knowledge";
 
 function MFilterFiles(props) {
-    const setSelectedFile = props.setSelectedFile;
-    const keyword = props.keyword;
-    const setKeyword = props.setKeyword;
-    const docs = props.docs;
-    const normalized = keyword.trim().toLowerCase();
     const buttonStyle = props.buttonStyle;
-    const deleteFiles = props.deleteFiles;
+    const dirty = props.dirty;
+    const setDirty = props.setDirty;
+    const selectedSet = props.selectedSet;
+    const setStatus = props.setStatus;
+    const setMessage = props.setMessage;
     
+    const [docs, setDocs] = React.useState([]);
     const [selectedDocs, setSelectedDocs] = React.useState([]);
+    const [keyword, setKeyword] = React.useState("");
+    const normalized = keyword.trim().toLowerCase();
     
     // 高亮匹配文本
     const highlight = (text) => {
@@ -56,12 +62,54 @@ function MFilterFiles(props) {
         );
     };
 
+    React.useEffect(() => {
+        if (!dirty) return;
+        queryDocs(
+            {
+                userid: sessionStorage.getItem("userdata.userid"),
+                keyword
+            },
+            (res) => {
+                if (res.ok) {
+                    setDocs(res.docs);
+                    setDirty(false);
+                }
+                else {
+                    setStatus("error");
+                    setMessage(res.message);
+                }
+            }
+        );
+    }, [dirty]);
+
+    const startAppendDocs = (docids) => {
+        appendDocsIntoSet(
+            {
+                userid: sessionStorage.getItem("userdata.userid"),
+                collectionname: selectedSet.collectionname,
+                docids
+            },
+            (res) => {
+                if (res.ok) {
+                    setStatus("success");
+                    setMessage("文档添加成功");
+                    setSelectedDocs([]);
+                    setDirty(true);
+                } else {
+                    setStatus("error");
+                    setMessage(res.message[0]);
+                }
+            }
+        );
+    };
+
     return (
         <Mui.Box
             sx={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
-                width: { xs: "100%", md: "60%" },
+                width: { xs: "100%", md: "60%" }
             }}
         >
             {/* 搜索栏 */}
@@ -96,7 +144,7 @@ function MFilterFiles(props) {
                 }}
             >
                 <Mui.Typography variant="body2" color="text.secondary">
-                    共 {docs.length} 个文档
+                    总库中共 {docs.length} 个文档
                 </Mui.Typography>
                 <Mui.Box>
                     <Mui.Button
@@ -111,13 +159,12 @@ function MFilterFiles(props) {
                     <Mui.Button
                         variant="contained"
                         size="small"
-                        color="error"
                         startIcon={<MuiIcons.Delete />}
                         disabled={selectedDocs.length === 0}
                         sx={buttonStyle}
-                        onClick={() => deleteFiles(selectedDocs)}
+                        onClick={() => startAppendDocs(selectedDocs)}
                     >
-                        批量删除
+                        批量添加
                     </Mui.Button>
                 </Mui.Box>
             </Mui.Box>
@@ -128,7 +175,7 @@ function MFilterFiles(props) {
             <Mui.Paper
                 variant="outlined"
                 sx={{
-                    height: "48vh",
+                    height: "38vh",
                     overflowY: "auto",
                     "&::-webkit-scrollbar": { width: 4 },
                     "&::-webkit-scrollbar-thumb": { bgcolor: "primary.light", borderRadius: 3 },
@@ -147,8 +194,8 @@ function MFilterFiles(props) {
                                         {(doc.path.length === 0 || doc.path[0] !== "/") ? "/" + doc.path : doc.path}
                                     </Mui.Typography>
                                 </Mui.Button>
-                                <Mui.IconButton onClick={() => deleteFiles([doc.docid])}>
-                                    <MuiIcons.Delete fontSize="small" sx={{ color: "error.main" }} />
+                                <Mui.IconButton onClick={() => startAppendDocs([doc.docid])}>
+                                    <MuiIcons.Add fontSize="small" sx={{ color: "primary.main" }} />
                                 </Mui.IconButton>
                             </>}
                             sx={{

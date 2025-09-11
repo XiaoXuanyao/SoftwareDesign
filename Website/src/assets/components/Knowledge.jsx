@@ -296,7 +296,7 @@ function MKnowledge() {
                             }}>
                                 <Mui.IconButton
                                     size="small"
-                                    onClick={() => editKnowledgeSet(item.collectionid)}
+                                    onClick={() => editKnowledgeSet(item)}
                                 >
                                     <MuiIcons.Edit color="primary"/>
                                 </Mui.IconButton>

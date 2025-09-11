@@ -59,7 +59,7 @@ class DocRespOut(BaseModel):
 class SetInsertIn(BaseModel):
     collectionname: str
     userid: str
-    docid: str
+    docids: list[str]
 
 class SetQueryIn(BaseModel):
     collectionname: str
@@ -190,7 +190,7 @@ def api_insert_knowledge_set(body: SetInsertIn):
         mes = {
             "collectionname": body.collectionname,
             "userid": body.userid,
-            "docid": body.docid
+            "docids": body.docids
         }
         ok, msg = insert_knowledgeset(mes)
         if not ok:

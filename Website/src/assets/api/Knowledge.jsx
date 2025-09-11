@@ -339,3 +339,103 @@ export async function renameOrMoveDoc(mes, callback) {
     }
     return result;
 }
+
+export async function queryAppendedDocs(mes, callback) {
+    const userid = mes.userid;
+    const collectionname = mes.collectionname;
+
+    let result = {
+        ok: true,
+        message: ["unknown"],
+        docs: null
+    };
+
+    if (!userid) {
+        result.ok = false;
+        result.message = ["用户未登录"];
+    }
+    if (!collectionname) {
+        result.ok = false;
+        result.message = ["知识库名称不能为空"];
+    }
+
+    if (result.ok) {
+        try {
+            const resp = await fetch(getConfig().apiUrl + "/knowledge/set/query", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid, collectionname })
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || !data || !data.ok) {
+                result.ok = false;
+                result.message = [data.message, data.detail, "查询失败"];
+            }
+            else {
+                result.ok = true;
+                result.message = ["查询成功"];
+                result.docs = data.docs || [];
+            }
+        } catch (e) {
+            result.ok = false;
+            result.message = ["网络错误"];
+            console.log(e);
+        }
+    }
+
+    if (callback) {
+        callback(result);
+    }
+    return result;
+}
+
+export async function appendDocsIntoSet(mes, callback) {
+    const userid = mes.userid;
+    const collectionname = mes.collectionname;
+    const docids = mes.docids;
+
+    let result = {
+        ok: true,
+        message: ["unknown"]
+    };
+
+    if (!userid) {
+        result.ok = false;
+        result.message = ["用户未登录"];
+    }
+    if (!collectionname) {
+        result.ok = false;
+        result.message = ["知识库名称不能为空"];
+    }
+    if (!docids || docids.length === 0) {
+        result.ok = false;
+        result.message = ["添加的文档列表不能为空"];
+    }
+
+    if (result.ok) {
+        try {
+            const resp = await fetch(getConfig().apiUrl + "/knowledge/set/insert", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid, collectionname, docids })
+            });
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok || !data || !data.ok) {
+                result.ok = false;
+                result.message = [data.message, data.detail, "添加失败"];
+            } else {
+                result.ok = true;
+                result.message = ["添加成功"];
+            }
+        } catch (e) {
+            result.ok = false;
+            result.message = ["网络错误"];
+            console.log(e);
+        }
+    }
+
+    if (callback) {
+        callback(result);
+    }
+    return result;
+}

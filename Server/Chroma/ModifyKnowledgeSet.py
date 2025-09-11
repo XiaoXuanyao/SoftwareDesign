@@ -4,7 +4,7 @@ from .ModifyCollection import check_collection_name
 from ..Mysql.Execute import execute
 from .Embedding.Extract import extract
 from .Embedding.Embedding import embedding_chunks
-from .ModifyCollection import hash_collection_name
+from .ModifyCollection import encode_collection_name, decode_collection_name, hash_collection_name
 from .Init import DOCS_DIR
 
 
@@ -53,66 +53,85 @@ def get_docs_count(hash: str):
 
 
 def insert(mes: dict):
+    mes["collectionname"] = encode_collection_name(mes["collectionname"])
     mes["hash"] = hash_collection_name(mes["collectionname"], mes["userid"])
 
     is_valid, message = check_permission(mes["collectionname"], mes["userid"], "w")
     if not is_valid:
         return False, message
-    is_exist, message = check_exist(mes["hash"], mes["docid"])
-    if is_exist:
-        return False, message
-    if get_docs_count(mes["hash"]) >= 50:
-        return False, "知识库文档数量已达上限"
-    
-    row = execute(
-        "SELECT docname, path FROM softwaredesign.docs WHERE docid=%s LIMIT 1;",
-        [mes["docid"]],
-    )
-    if row is None:
-        return False, "文档不存在"
-    docname = row["docname"]
-    path = DOCS_DIR / row["path"] / docname
-    if not path.exists():
-        return False, "文档不存在，可能已被删除"
-    
-    try:
-        chunks = extract({
-            "type": "file",
-            "name": docname,
-            "path": str(path)
-        })
-        embeddings = embedding_chunks(chunks)
-        collection = client.get_collection(mes["hash"])
-        ids = [f"{mes['docid']}-{i}" for i in range(len(chunks))]
-        metadatas = [{
-            "docid": mes["docid"],
-            "docname": docname,
-            "chunk_index": i,
-        } for i in range(len(chunks))]
-        collection.add(
-            ids=ids,
-            documents=chunks,
-            embeddings=embeddings,
-            metadatas=metadatas
+
+    if mes["docids"] is None or len(mes["docids"]) == 0:
+        return False, "未提供任何文档ID"
+    if len(mes["docids"]) > 50:
+        return False, "一次最多添加50个文档"
+
+    for docid in mes["docids"]:
+        mes["docid"] = docid
+        is_exist, message = check_exist(mes["hash"], mes["docid"])
+        if is_exist:
+            return False, message
+        if get_docs_count(mes["hash"]) >= 50:
+            return False, "知识库文档数量已达上限"
+        
+        row = execute(
+            "SELECT docname, path, description FROM softwaredesign.docs WHERE docid=%s LIMIT 1;",
+            [mes["docid"]],
         )
-    except Exception as e:
-        return False, f"文档处理失败: {str(e)}"
-    
-    try:
-        execute(
-            f"INSERT INTO sdcollections.{mes['hash']} "
-            + "(docid, docname, uploaduserid, type, description) VALUES (%s, %s, %s, %s, %s);",
-            (mes["docid"], docname, mes["userid"], "file", mes.get("description", ""))
-        )
-    except Exception as e:
-        collection.delete(ids=ids)
-        return False, f"数据库操作失败: {str(e)}"
+        if row is None:
+            return False, "文档不存在"
+        docname = row["docname"]
+        path = DOCS_DIR / row["path"].strip("/") / docname
+        if not path.is_file():
+            return False, "文档不存在，可能已被删除"
+        
+        try:
+            is_valid, message = extract({
+                "type": "file",
+                "name": docname,
+                "path": str(path)
+            })
+            if not is_valid:
+                return False, message
+            chunks = message
+
+            embeddings = embedding_chunks(chunks)
+            texts = [getattr(c, "page_content", str(c)) for c in chunks]
+            metadatas = []
+            for i, c in enumerate(chunks):
+                base = dict(getattr(c, "metadata", {}) or {})
+                base.update({
+                    "docid": mes["docid"],
+                    "docname": docname,
+                    "chunk_index": i,
+                })
+                metadatas.append(base)
+            collection = client.get_collection(mes["hash"])
+            ids = [f"{mes['docid']}-{i}" for i in range(len(texts))]
+            collection.add(
+                ids=ids,
+                documents=texts,
+                embeddings=embeddings,
+                metadatas=metadatas
+            )
+        except Exception as e:
+            return False, f"文档处理失败: {str(e)}"
+        
+        try:
+            execute(
+                f"INSERT INTO sdcollections.{mes['hash']} "
+                + "(docid, docname, uploaduserid, type, description) VALUES (%s, %s, %s, %s, %s);",
+                (mes["docid"], docname, mes["userid"], "file", row.get("description", ""))
+            )
+        except Exception as e:
+            collection.delete(ids=ids)
+            return False, f"数据库操作失败: {str(e)}"
     
     return True, "文档添加成功"
 
 
 
 def query(mes: dict):
+    mes["collectionname"] = encode_collection_name(mes["collectionname"])
     mes["hash"] = hash_collection_name(mes["collectionname"], mes["userid"])
 
     is_valid, message = check_permission(mes["collectionname"], mes["userid"], "r")

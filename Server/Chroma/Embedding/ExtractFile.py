@@ -8,11 +8,11 @@ import os
 
 def extract_pdf(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
     path = mes["path"]
-    pdf_abs_path = os.path.abspath(path)
-    if not os.path.exists(pdf_abs_path):
+    abs_path = os.path.abspath(path)
+    if not os.path.exists(abs_path):
         return False, "文件不存在"
     
-    loader = PyPDFLoader(pdf_abs_path)
+    loader = PyPDFLoader(abs_path)
     documents = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
@@ -29,11 +29,11 @@ def extract_pdf(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
 
 def extract_word(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
     path = mes["path"]
-    pdf_abs_path = os.path.abspath(path)
-    if not os.path.exists(pdf_abs_path):
+    abs_path = os.path.abspath(path)
+    if not os.path.exists(abs_path):
         return False, "文件不存在"
     
-    loader = UnstructuredWordDocumentLoader(pdf_abs_path)
+    loader = UnstructuredWordDocumentLoader(abs_path)
     documents = loader.load()
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
@@ -49,18 +49,19 @@ def extract_word(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
 
 def extract_txt(mes: dict, chunk_size: int = 256, chunk_overlap: int = 32):
     path = mes["path"]
-    pdf_abs_path = os.path.abspath(path)
-    if not os.path.exists(pdf_abs_path):
+    abs_path = os.path.abspath(path)
+    if not os.path.exists(abs_path):
         return False, "文件不存在"
 
-    with open(pdf_abs_path, "r", encoding="utf-8") as f:
+    with open(abs_path, "r", encoding="utf-8") as f:
         text = f.read()
+    base_doc = Document(page_content=text, metadata={"source": mes["name"]})
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,
         length_function=len,
     )
-    chunks = text_splitter.split_text(text)
+    chunks = text_splitter.split_documents([base_doc])
     for i, chunk in enumerate(chunks):
         chunk.metadata["source"] = mes["name"]
         chunk.metadata["chunk_index"] = i + 1

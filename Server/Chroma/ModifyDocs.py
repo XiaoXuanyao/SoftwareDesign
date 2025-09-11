@@ -55,8 +55,9 @@ def upload(mes: dict):
         is_valid, message = check_doc_path(mes["path"])
         if not is_valid:
             return False, message
+        mes["path"] = mes["path"].strip("/").replace("..", "")
         
-        save_dir = DOCS_DIR / mes["path"].strip("/").replace("..", "")
+        save_dir = DOCS_DIR / mes["path"]
         os.makedirs(save_dir, exist_ok=True)
 
         for file in mes["files"]:
