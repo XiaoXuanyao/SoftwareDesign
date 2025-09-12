@@ -52,7 +52,7 @@ function MarkdownKatex(props) {
                     )
             }}
         >
-            {chat.Message}
+            {chat.message}
         </ReactMarkdown>
     );
 }

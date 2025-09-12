@@ -2,14 +2,33 @@ import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 
-function MHistoryChatList() {
-    const [items, setItems] = React.useState(() =>
-        Array.from({ length: 8 }, (_, i) => ({
-            id: i + 1,
-            title: `会话 ${i + 1}`,
-            time: new Date().toLocaleTimeString().slice(0, 5),
-        }))
-    );
+function MHistoryChatList(props) {
+    const sessionsList = props.sessionsList;
+    const setSessionsList = props.setSessionsList;
+    const currentSession = props.currentSession;
+    const setCurrentSession = props.setCurrentSession;
+
+    const handleAddSession = React.useCallback(() => {
+        const now = Date.now();
+        const newSession = {
+            id: `s-${now}-${Math.random().toString(36).slice(2,6)}`,
+            title: "新的会话",
+            createdAt: now,
+            updatedAt: now,
+            content: [{ id: 0, who: "assistant", message: "您好！我是您的AI助手，请问有什么可以帮您？" }]
+        };
+        setSessionsList?.(prev => [newSession, ...(prev || [])]);
+        setCurrentSession?.(newSession);
+    }, [setSessionsList, setCurrentSession]);
+
+    const initedRef = React.useRef(false);
+    React.useEffect(() => {
+        if (initedRef.current) return;
+        initedRef.current = true;
+        if ((sessionsList || []).length === 0) {
+            handleAddSession();
+        }
+    }, [sessionsList, handleAddSession]);
 
     return (
         <Mui.Paper
@@ -36,6 +55,20 @@ function MHistoryChatList() {
                 </Mui.Typography>
             </Mui.Box>
             <Mui.Divider />
+            <Mui.Box sx={{ px: 1.5, pt: 1, pb: 1 }}>
+                <Mui.Button
+                    fullWidth
+                    size="small"
+                    variant="contained"
+                    startIcon={<MuiIcons.Add />}
+                    onClick={handleAddSession}
+                    sx={{
+                        ":hover": { color: "text.onprimary" }
+                    }}
+                >
+                    新增会话
+                </Mui.Button>
+            </Mui.Box>
             <Mui.Box
                 sx={{
                     flex: 1,
@@ -50,7 +83,7 @@ function MHistoryChatList() {
                 }}
             >
                 <Mui.List dense disablePadding>
-                    {items.map((it) => (
+                    {sessionsList.map((it) => (
                         <Mui.ListItem
                             key={it.id}
                             disablePadding
@@ -59,7 +92,11 @@ function MHistoryChatList() {
                                 borderRadius: 1,
                             }}
                         >
-                            <Mui.ListItemButton sx={{ p:0, alignItems: "flex-start" }}>
+                            <Mui.ListItemButton
+                                sx={{ p:0, alignItems: "flex-start" }}
+                                selected={currentSession?.id === it.id}
+                                onClick={() => setCurrentSession?.(it)}
+                            >
                                 <Mui.ListItemIcon sx={{ minWidth: 32 }}>
                                     <MuiIcons.ChatBubbleOutline
                                         fontSize="small"
@@ -83,7 +120,7 @@ function MHistoryChatList() {
                                             noWrap
                                             sx={{ display: "block", p: 0 }}
                                         >
-                                            {it.time}
+                                            {it.updatedAt ? new Date(it.createdAt).toLocaleString() : "未知"}
                                         </Mui.Typography>
                                     }
                                     sx={{ p: 0 }}
@@ -91,7 +128,7 @@ function MHistoryChatList() {
                             </Mui.ListItemButton>
                         </Mui.ListItem>
                     ))}
-                    {items.length === 0 && (
+                    {sessionsList.length === 0 && (
                         <Mui.ListItem>
                             <Mui.ListItemText
                                 primary={

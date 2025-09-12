@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .Auth import router as auth_router
 from .Knowledge import router as knowledge_router
+from .Chat import router as chat_router
 from .Mysql import CreateTable
 
 CreateTable.check()
@@ -16,3 +17,4 @@ app.add_middleware(
 )
 app.include_router(auth_router)
 app.include_router(knowledge_router)
+app.include_router(chat_router)
