@@ -3,7 +3,7 @@ import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
 import AppendedDocsList from "../ManageSets/AppendedDocsList.jsx";
 import AppendedWebsitesList from "../ManageSets/AppendedWebsitesList.jsx";
-import FilterFiles from "../ManageSets/FilterDocs.jsx";
+import FilterDocs from "../ManageSets/FilterDocs.jsx";
 
 export default function MManageSet(props) {
     const open = props.open;
@@ -70,7 +70,10 @@ export default function MManageSet(props) {
                             m: 1,
                             "&:hover": { color: "text.onprimary" }
                         }}
-                        onClick={() => setSelectedAppendedMesType("doc")}
+                        onClick={() => {
+                            setSelectedAppendedMesType("doc");
+                            setDirty(true);
+                        }}
                     >
                         管理文档
                     </Mui.Button>
@@ -80,6 +83,11 @@ export default function MManageSet(props) {
                             m: 1,
                             "&:hover": { color: "text.onprimary" }
                         }}
+                        onClick={() => {
+                            setSelectedAppendedMesType("website");
+                            setDirty(true);
+                        }}
+                        disabled={true}
                     >
                         管理网页
                     </Mui.Button>
@@ -93,7 +101,7 @@ export default function MManageSet(props) {
                                 borderColor: "error.main"
                             }
                         }}
-                        onClick={() => { setSelectedAppendedMesType("website") }}
+                        disabled={true}
                     >
                         删除知识库
                     </Mui.Button>
@@ -127,7 +135,7 @@ export default function MManageSet(props) {
                                 selectedSet={selectedSet}
                             />
                             <Mui.Divider orientation="vertical" flexItem />
-                            <FilterFiles
+                            <FilterDocs
                                 dirty={dirty}
                                 setDirty={setDirty}
                                 buttonStyle={buttonStyle}
@@ -138,10 +146,26 @@ export default function MManageSet(props) {
                         </Mui.Box>
                     }
                     {selectedAppendedMesType === "website" &&
-                        <AppendedWebsitesList
-                            selectedSet={selectedSet}
-                            setSelectedFile={() => { }}
-                        />
+                        <Mui.Box sx={{
+                            display: "flex",
+                            flexDirection: { xs: "column", sm: "row" },
+                            gap: 2
+                        }}>
+                            <AppendedWebsitesList
+                                buttonStyle={buttonStyle}
+                                dirty={dirty}
+                                selectedSet={selectedSet}
+                            />
+                            <Mui.Divider orientation="vertical" flexItem />
+                            <FilterWebsites
+                                dirty={dirty}
+                                setDirty={setDirty}
+                                buttonStyle={buttonStyle}
+                                selectedSet={selectedSet}
+                                setStatus={setStatus}
+                                setMessage={setMessage}
+                            />
+                        </Mui.Box>
                     }
                 </Mui.Box>
 

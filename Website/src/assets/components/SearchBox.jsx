@@ -26,7 +26,7 @@ function SearchBox(props) {
         }
         else {
             console.log(`Search: ${text}`);
-            navigate(`/assistant?query=${text}`);
+            navigate(`/assistant?query=${encodeURIComponent(text)}`);
         }
     }, [onSearch, navigate]);
 

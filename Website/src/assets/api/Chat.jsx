@@ -54,3 +54,84 @@ export async function askChat(mes, callback) {
     if (callback) callback(result);
     return result;
 }
+
+export async function readChatSave(mes, callback) {
+    const userid = mes?.userid || sessionStorage.getItem("userdata.userid") || "";
+    const result = {
+        ok: true,
+        message: ["unknown"],
+        content: null
+    };
+
+    if (!userid) {
+        result.ok = false;
+        result.message = ["缺少用户ID"];
+    }
+    
+    if (result.ok) {
+        try {
+            const resp = await fetch(getConfig().apiUrl + "/chat/readsave", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid })
+            });
+            const data = await resp.json().catch(() => ({}));
+
+            if (!resp.ok || !data?.ok) {
+                result.ok = false;
+                result.message = [data?.message || "读取失败"];
+            } else {
+                result.ok = true;
+                result.message = ["success"];
+                result.content = data.content || null;
+            }
+        } catch (e) {
+            console.log(e);
+            result.ok = false;
+            result.message = ["网络错误"];
+        }
+    }
+
+    callback && callback(result);
+    return result;
+}
+
+export async function writeChatSave(mes, callback) {
+    const userid = mes?.userid || sessionStorage.getItem("userdata.userid") || "";
+    const content = mes?.content ?? "";
+    const result = {
+        ok: true,
+        message: ["unknown"]
+    };
+
+    if (!userid) {
+        result.ok = false;
+        result.message = ["缺少用户ID"];
+    }
+
+    if (result.ok) {
+        try {
+            const resp = await fetch(getConfig().apiUrl + "/chat/writesave", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ userid, content })
+            });
+            const data = await resp.json().catch(() => ({}));
+
+            if (!resp.ok || !data?.ok) {
+                result.ok = false;
+                result.message = [data?.message || "保存失败"];
+            } else {
+                result.ok = true;
+                result.message = ["success"];
+            }
+        } catch (e) {
+            console.log(e);
+            result.ok = false;
+            result.message = ["网络错误"];
+        }
+    }
+
+    callback && callback(result);
+    return result;
+}

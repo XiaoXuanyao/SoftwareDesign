@@ -6,7 +6,7 @@ import {
     appendDocsIntoSet
 } from "../../api/Knowledge";
 
-function MFilterFiles(props) {
+function MFilterDocs(props) {
     const buttonStyle = props.buttonStyle;
     const dirty = props.dirty;
     const setDirty = props.setDirty;
@@ -251,4 +251,4 @@ function MFilterFiles(props) {
     );
 }
 
-export default MFilterFiles;
+export default MFilterDocs;

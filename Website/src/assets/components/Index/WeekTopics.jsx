@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const topics = [
     "给定最多 2e5 次区间加与区间求和操作，如何选择数据结构并保证 O(log n) 复杂度？",
@@ -32,6 +33,11 @@ export default function WeekTopics() {
         () => topics.map(t => ({ term: t, hits: hotScore(t) })).sort((a, b) => b.hits - a.hits),
         []
     );
+    const navigate = useNavigate();
+    const handleSearch = (term) => {
+        if (!term) return;
+        navigate(`/assistant?query=${encodeURIComponent(term)}`);
+    }
 
     return (
         <Mui.Paper elevation={3} sx={{ p: 2, borderRadius: 2 }}>
@@ -60,38 +66,40 @@ export default function WeekTopics() {
                                 mb: 0.5,
                             }}
                         >
-                            <Mui.ListItemAvatar>
-                                <Mui.Avatar
-                                    variant="circular"
-                                    sx={{
-                                        width: 32,
-                                        height: 32,
-                                        bgcolor: m.bg,
-                                        color: m.fg,
-                                        fontSize: 14,
-                                        fontWeight: 700,
-                                    }}
-                                >
-                                    {m.icon ? m.icon : rank}
-                                </Mui.Avatar>
-                            </Mui.ListItemAvatar>
-                            <Mui.ListItemText
-                                primary={
-                                    <Mui.Typography
-                                        variant="body1"
-                                        sx={{ fontWeight: rank <= 3 ? 700 : 500 }}
+                            <Mui.ListItemButton onClick={() => handleSearch(item.term)} sx={{ py: 0.75, mr: 6 }}>
+                                <Mui.ListItemAvatar>
+                                    <Mui.Avatar
+                                        variant="circular"
+                                        sx={{
+                                            width: 32,
+                                            height: 32,
+                                            bgcolor: m.bg,
+                                            color: m.fg,
+                                            fontSize: 14,
+                                            fontWeight: 700,
+                                        }}
                                     >
-                                        {item.term}
-                                    </Mui.Typography>
-                                }
-                                secondary={
-                                    rank <= 3 ? (
-                                        <Mui.Typography variant="caption" color="text.secondary">
-                                            TOP {rank}
+                                        {m.icon ? m.icon : rank}
+                                    </Mui.Avatar>
+                                </Mui.ListItemAvatar>
+                                <Mui.ListItemText
+                                    primary={
+                                        <Mui.Typography
+                                            variant="body1"
+                                            sx={{ fontWeight: rank <= 3 ? 700 : 500 }}
+                                        >
+                                            {item.term}
                                         </Mui.Typography>
-                                    ) : null
-                                }
-                            />
+                                    }
+                                    secondary={
+                                        rank <= 3 ? (
+                                            <Mui.Typography variant="caption" color="text.secondary">
+                                                TOP {rank}
+                                            </Mui.Typography>
+                                        ) : null
+                                    }
+                                />
+                            </Mui.ListItemButton>
                         </Mui.ListItem>
                     );
                 })}

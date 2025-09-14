@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as Mui from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const rawSearches = [
     { term: "数据结构", hits: 128 },
@@ -12,6 +13,11 @@ const rawSearches = [
 
 export default function TrendingSearches() {
     const list = React.useMemo(() => [...rawSearches].sort((a, b) => b.hits - a.hits), []);
+    const navigate = useNavigate();
+    const handleSearch = (term) => {
+        if (!term) return;
+        navigate(`/assistant?query=${encodeURIComponent(term)}`);
+    }
 
     const medal = (rank) => {
         if (rank === 1) return { bg: "#FFD700", fg: "#000", icon: <MuiIcons.EmojiEvents fontSize="small" /> }; // 金
@@ -46,36 +52,38 @@ export default function TrendingSearches() {
                                 mb: 0.5,
                             }}
                         >
-                            <Mui.ListItemAvatar>
-                                <Mui.Avatar
-                                    variant="circular"
-                                    sx={{
-                                        width: 32,
-                                        height: 32,
-                                        bgcolor: m.bg,
-                                        color: m.fg,
-                                        fontSize: 14,
-                                        fontWeight: 700,
-                                    }}
-                                >
-                                    {m.icon ? m.icon : rank}
-                                </Mui.Avatar>
-                            </Mui.ListItemAvatar>
-                            <Mui.ListItemText
-                                primary={
-                                    <Mui.Typography variant="body1" sx={{
-                                        fontWeight: rank <= 3 ? 700 : 500 }}>
-                                        {item.term}
-                                    </Mui.Typography>
-                                }
-                                secondary={
-                                    rank <= 3 ? (
-                                        <Mui.Typography variant="caption" color="text.secondary">
-                                            TOP {rank}
+                            <Mui.ListItemButton onClick={() => handleSearch(item.term)} sx={{ py: 0.75 }}>
+                                <Mui.ListItemAvatar>
+                                    <Mui.Avatar
+                                        variant="circular"
+                                        sx={{
+                                            width: 32,
+                                            height: 32,
+                                            bgcolor: m.bg,
+                                            color: m.fg,
+                                            fontSize: 14,
+                                            fontWeight: 700,
+                                        }}
+                                    >
+                                        {m.icon ? m.icon : rank}
+                                    </Mui.Avatar>
+                                </Mui.ListItemAvatar>
+                                <Mui.ListItemText
+                                    primary={
+                                        <Mui.Typography variant="body1" sx={{
+                                            fontWeight: rank <= 3 ? 700 : 500 }}>
+                                            {item.term}
                                         </Mui.Typography>
-                                    ) : null
-                                }
-                            />
+                                    }
+                                    secondary={
+                                        rank <= 3 ? (
+                                            <Mui.Typography variant="caption" color="text.secondary">
+                                                TOP {rank}
+                                            </Mui.Typography>
+                                        ) : null
+                                    }
+                                />
+                            </Mui.ListItemButton>
                         </Mui.ListItem>
                     );
                 })}
