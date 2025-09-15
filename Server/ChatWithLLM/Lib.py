@@ -1,4 +1,4 @@
-
+from pathlib import Path
 import json
 import torch
 import chromadb
@@ -14,7 +14,8 @@ from ..Debug import Debug
 
 
 
-API_KEY = "sk-4a66ac6e8e7a4ca086d42b3008f0af74"
+API_KEY_PATH = Path(__file__).resolve().parent / "APIKey.json"
+API_KEY = json.load(open(API_KEY_PATH))["key"]
 
 
 

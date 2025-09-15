@@ -9,8 +9,6 @@ import "katex/dist/katex.min.css";
 
 function normalizeMathDelimiters(s) {
     if (!s) return "";
-    s = s.replace(/[（）【】]/g, (ch) => ({ "（": "(", "）": ")", "【": "[", "】": "]" }[ch] || ch));
-    s = s.replace(/\\\s*$/gm, "");
     s = s.replace(/\\\(([\s\S]+?)\\\)/g, (_m, inner) => `$${inner}$`);
     s = s.replace(/\\\[((?:[\s\S])*?)\\\]/g, (_m, inner) => `\n\n$$\n${inner}\n$$\n\n`);
     const looksMath = /\\[A-Za-z]+|[_^]|[=]|[{}]|\\left|\\right|\\operatorname/;
@@ -33,7 +31,7 @@ function MarkdownKatex(props) {
                 rehypePlugins={[[rehypeKatex, { throwOnError: false, strict: "ignore" }]]}
                 components={{
                     p: ({ children }) => (
-                        <Mui.Typography variant="body2" sx={{ mb: 1, "& .katex-display": { overflowX: "auto" } }}>
+                        <Mui.Typography variant="body2" sx={{ "& .katex-display": { overflowX: "auto" } }}>
                             {children}
                         </Mui.Typography>
                     ),
